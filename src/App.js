@@ -1,6 +1,8 @@
 import React from 'react'
 import { Map, Controls, LayerPanel, Popup, centerAndZoom } from '@bayer/ol-kit'
 
+import UploadModal from './components/UploadModal'
+
 class App extends React.Component {
   onMapInit = async map => {
     const opts = {
@@ -17,7 +19,9 @@ class App extends React.Component {
         fullScreen
         onMapInit={this.onMapInit}
         updateUrlFromView={false}
-        updateViewFromUrl={false}>
+        updateViewFromUrl={false}
+      >
+        <UploadModal />
         <Controls />
         <LayerPanel />
         <Popup />
