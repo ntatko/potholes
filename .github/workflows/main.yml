@@ -51,7 +51,7 @@ jobs:
       run: echo $HEROKU_PASSWORD | docker login -u $HEROKU_USERNAME --password-stdin
     
     - name: build the docker image
-      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/ .
+      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA .
     
     - name: push the docker image to docker
       run: |
@@ -60,5 +60,6 @@ jobs:
 
     - name: push the docker image to heroku
       run: |
-        docker push $HEROKU_REGISTRY/$HEROKU_APP
+        docker push $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA
+        docker push $HEROKU_REGISTRY/$HEROKU_APP:latest
         heroku container:release web
