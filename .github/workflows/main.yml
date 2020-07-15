@@ -32,7 +32,7 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: login to docker
-      run: docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      run: docker login $DOCKER_REGISTRY -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
     
     - name: build the docker image
       run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $CONTAINER_IMAGE:latest .
