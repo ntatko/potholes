@@ -40,7 +40,7 @@ jobs:
       run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
     
     - name: build the docker image
-      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $CONTAINER_IMAGE:latest .
+      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest .
     
     - name: push the docker image
       run: |
