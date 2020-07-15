@@ -53,13 +53,11 @@ jobs:
       run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA -t $HEROKU_REGISTRY/$HEROKU_APP:latest .
     
     - name: push the docker image to docker
-      needs: test
       run: |
         docker push $DOCKER_REGISTRY:$GITHUB_SHA
         docker push $DOCKER_REGISTRY:latest
 
     - name: push the docker image to heroku
-      needs: test
       run: |
         echo "machine api.heroku.com\n\tlogin $HEROKU_USERNAME\n\tpassword $HEROKU_PASSWORD" > ~/.netrc
         cat ~/.netrc
