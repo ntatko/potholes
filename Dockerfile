@@ -5,7 +5,13 @@ ENV PATH /node_modules/.bin:$PATH
 
 COPY package.json /
 RUN npm install --silent
-COPY . /
+
+# COPY only the things we need - devops changes shouldn't affect the build
+COPY src/ src/
+COPY scripts/ scripts/
+COPY public/ public/
+COPY config/ config/
+
 # RUN source .env.production.local && npm run build
 RUN npm run build
 
