@@ -23,8 +23,12 @@ jobs:
     needs: test
     env:
       DOCKER_REGISTRY: ntatko/geokit-app
+      HEROKU_REGISTRY: registry.heroku.com
+      HEROKU_APP: geokit-app
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
+      HEROKU_PASSWORD: ${{ secrets.HEROKU_PASSWORD }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -39,18 +43,22 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+
+    - name: login to heroku
+      env:
+        HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
+        HEROKU_PASSWORD: ${{ secrets.HEROKU_PASSWORD }}
+      run: echo $HEROKU_PASSWORD | docker login -u $HEROKU_USERNAME --password-stdin
     
     - name: build the docker image
-      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest .
+      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/ .
     
-    - name: push the docker image
+    - name: push the docker image to docker
       run: |
         docker push $DOCKER_REGISTRY:$GITHUB_SHA
         docker push $DOCKER_REGISTRY:latest
-        
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: just a test
-        run: echo testing
+
+    - name: push the docker image to heroku
+      run: |
+        docker push $HEROKU_REGISTRY/$HEROKU_APP
+        heroku container:release web
