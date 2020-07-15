@@ -47,7 +47,12 @@ jobs:
       env:
         HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
         HEROKU_PASSWORD: ${{ secrets.HEROKU_PASSWORD }}
-      run: echo $HEROKU_PASSWORD | docker login $HEROKU_REGISTRY -u $HEROKU_USERNAME --password-stdin
+      run: |
+        echo "machine api.heroku.com" > ~/.netrc
+        echo "  login $HEROKU_USERNAME" >> ~/.netrc
+        echo "  password $HEROKU_PASSWORD" >> ~/.netrc
+        cat ~/.netrc
+        echo $HEROKU_PASSWORD | docker login $HEROKU_REGISTRY -u $HEROKU_USERNAME --password-stdin
     
     - name: build the docker image
       run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA -t $HEROKU_REGISTRY/$HEROKU_APP:latest .
@@ -59,8 +64,6 @@ jobs:
 
     - name: push the docker image to heroku
       run: |
-        echo "machine api.heroku.com\n\tlogin $HEROKU_USERNAME\n\tpassword $HEROKU_PASSWORD" > ~/.netrc
-        cat ~/.netrc
         docker push $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA
         docker push $HEROKU_REGISTRY/$HEROKU_APP:latest
         heroku container:release web -a $HEROKU_APP
