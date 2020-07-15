@@ -60,7 +60,7 @@ jobs:
 
     - name: push the docker image to heroku
       run: |
-        echo "machine api.heroku.com\n\tlogin $HEROKU_USERNAME\n\tpassword $HEROKU_PASSWORD"
+        echo "machine api.heroku.com\n\tlogin $HEROKU_USERNAME\n\tpassword $HEROKU_PASSWORD" > ~/.netrc
         docker push $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA
         docker push $HEROKU_REGISTRY/$HEROKU_APP:latest
         heroku container:release web -a $HEROKU_APP
