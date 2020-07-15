@@ -20,6 +20,7 @@ jobs:
         run: npm run test
         
   build:
+    needs: test
     env:
       DOCKER_REGISTRY: ntatko/geokit-app
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -54,6 +55,7 @@ jobs:
         echo test, and deploy your project.
         
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: just a test
