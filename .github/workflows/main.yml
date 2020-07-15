@@ -32,8 +32,12 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     
-    - name: make sure that tokens exist
-      run: echo $DOCKER_USERNAME
+    - name: update docker
+      run: |
+        apt-get remove docker docker-engine docker.io containerd runc
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        apt-get install docker-ce docker-ce-cli containerd.io
 
     # Runs a single command using the runners shell
     - name: login to docker
