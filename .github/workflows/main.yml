@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install the deps
-        run: npm i
+        run: npm i eslint eslint-config-react-app eslint-loader eslint-plugin-flowtype eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react eslint-plugin-react-hooks
       - name: run the tests
         run: npm run test
         
@@ -48,7 +48,7 @@ jobs:
       env:
         HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
         HEROKU_PASSWORD: ${{ secrets.HEROKU_PASSWORD }}
-      run: echo $HEROKU_PASSWORD | docker login -u $HEROKU_USERNAME --password-stdin
+      run: echo $HEROKU_PASSWORD | docker login $HEROKU_REGISTRY -u $HEROKU_USERNAME --password-stdin
     
     - name: build the docker image
       run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA .
