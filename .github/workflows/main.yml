@@ -64,6 +64,7 @@ jobs:
 
     - name: push the docker image to heroku
       run: |
+        heroku container:push -a $HEROKU_APP web
         docker push $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA
         docker push $HEROKU_REGISTRY/$HEROKU_APP:latest
         heroku container:release web -a $HEROKU_APP
