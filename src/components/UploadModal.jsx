@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import EXIF from 'exif-js'
 
-import { connectToMap, VectorLayer } from '@bayer/ol-kit'
+import { connectToMap, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
 import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
@@ -14,10 +14,6 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Input from '@material-ui/core/Input'
 import Typography from '@material-ui/core/Typography'
 const fs = require('fs')
-
-
-
-
 
 
 function ConvertDMSToDD(degrees, minutes, seconds, direction) {
@@ -73,7 +69,11 @@ class UploadModal extends Component {
         })
       })
       map.addLayer(layer)
+
+      centerAndZoom(map, { y: latFinal, x: lonFinal, zoom: 17.16 })
     })
+
+    
 
     this.props.handleModalClose()
   }

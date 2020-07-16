@@ -30,8 +30,6 @@ class App extends React.Component {
       <Map
         fullScreen
         onMapInit={this.onMapInit}
-        updateUrlFromView={false}
-        updateViewFromUrl={false}
       >
         <Sidebar showModal={this.showModal} />
         {this.state.showModal && <UploadModal open={this.state.showModal} handleModalClose={() => this.setState({showModal: false})} />}
