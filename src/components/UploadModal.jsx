@@ -87,7 +87,7 @@ class UploadModal extends Component {
           <DialogTitle>Upload Pothole Image</DialogTitle>
           <DialogContent>
             <Typography>Upload your file!</Typography> 
-            <Input type='file' accept="image/*" onChange={(e) => {
+            <Input type='file' inputProps={{ accept: 'image/*' }} onChange={(e) => {
               this.handleChange(e, this.props.map)
               this.setState({ open: false })
             }} />
