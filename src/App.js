@@ -13,7 +13,7 @@ class App extends React.Component {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     await navigator.permissions.query({name:'geolocation'})
   }
 
