@@ -13,6 +13,10 @@ class App extends React.Component {
     }
   }
 
+  componentDidMount() {
+    await navigator.permissions.query({name:'geolocation'})
+  }
+
   onMapInit = async map => {
     const opts = {
       x: -89.938355,
