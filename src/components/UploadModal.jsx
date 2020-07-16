@@ -43,17 +43,18 @@ class UploadModal extends Component {
 
     EXIF.getData(stuff.target.files[0], function() {
       const tags =  EXIF.getAllTags(this);
+      console.log("tags", tags)
 
-      const latDegree = tags.GPSLatitude[0].numerator;
-      const latMinute = tags.GPSLatitude[1].numerator;
-      const latSecond = tags.GPSLatitude[2].numerator;
+      const latDegree = tags.GPSLatitude[0].numerator/tags.GPSLatitude[0].denominator;
+      const latMinute = tags.GPSLatitude[1].numerator/tags.GPSLatitude[1].denominator;
+      const latSecond = tags.GPSLatitude[2].numerator/tags.GPSLatitude[2].denominator;
       const latDirection = tags.GPSLatitudeRef;
       const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
       console.log(latFinal);
       // Calculate longitude decimal
-      const lonDegree = tags.GPSLongitude[0].numerator;
-      const lonMinute = tags.GPSLongitude[1].numerator;
-      const lonSecond = tags.GPSLongitude[2].numerator;
+      const lonDegree = tags.GPSLongitude[0].numerator/tags.GPSLongitude[0].denominator;
+      const lonMinute = tags.GPSLongitude[1].numerator/tags.GPSLongitude[1].denominator;
+      const lonSecond = tags.GPSLongitude[2].numerator/tags.GPSLongitude[2].denominator;
       const lonDirection = tags.GPSLongitudeRef;
       const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
       console.log(lonFinal);
@@ -66,6 +67,7 @@ class UploadModal extends Component {
             feature_type: ['the lake house'],
             title: 'the lake house',
             name: 'the lake house',
+            ...tags,
             geometry: new olGeomPoint(olProj.fromLonLat([lonFinal, latFinal]))
           })]
         })
