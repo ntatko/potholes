@@ -70,9 +70,9 @@ class MobileHome extends Component {
       <div style={container}>
           <img style={{ width: '125px', borderRadius: '15px' }} src={Logo} alt='logo' />
         <div style={buttonContainer}>
-          <div style={{ margin: '15px' }}>
+          {/* <div style={{ margin: '15px' }}>
             <button style={button} className='waves-effect waves-light btn'>Take Photo</button>
-          </div>
+          </div> */}
           <div style={{ margin: '15px' }}>
             <button style={button} onClick={() => document.getElementById('file-upload').click()} className='waves-effect waves-light btn'>Upload Photo</button>
             <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
