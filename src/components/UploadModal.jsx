@@ -6,6 +6,7 @@ import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
+import Geolocation from 'ol/geolocation';
 
 import Dialog from '@material-ui/core/Dialog'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -41,36 +42,66 @@ class UploadModal extends Component {
       const tags =  EXIF.getAllTags(this);
       console.log("tags", tags)
 
-      const latDegree = tags.GPSLatitude[0].numerator/tags.GPSLatitude[0].denominator;
-      const latMinute = tags.GPSLatitude[1].numerator/tags.GPSLatitude[1].denominator;
-      const latSecond = tags.GPSLatitude[2].numerator/tags.GPSLatitude[2].denominator;
-      const latDirection = tags.GPSLatitudeRef;
-      const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
-      console.log(latFinal);
-      // Calculate longitude decimal
-      const lonDegree = tags.GPSLongitude[0].numerator/tags.GPSLongitude[0].denominator;
-      const lonMinute = tags.GPSLongitude[1].numerator/tags.GPSLongitude[1].denominator;
-      const lonSecond = tags.GPSLongitude[2].numerator/tags.GPSLongitude[2].denominator;
-      const lonDirection = tags.GPSLongitudeRef;
-      const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
-      console.log(lonFinal);
+      if (tags.GPSLatitude) {
 
-
-      const layer = new VectorLayer({
-        title: 'Diltz\' House',
-        source: new olSourceVector({
-          features: [new olFeature({
-            feature_type: ['the lake house'],
-            title: 'the lake house',
-            name: 'the lake house',
-            ...tags,
-            geometry: new olGeomPoint(olProj.fromLonLat([lonFinal, latFinal]))
-          })]
+        const latDegree = tags.GPSLatitude[0].numerator/tags.GPSLatitude[0].denominator;
+        const latMinute = tags.GPSLatitude[1].numerator/tags.GPSLatitude[1].denominator;
+        const latSecond = tags.GPSLatitude[2].numerator/tags.GPSLatitude[2].denominator;
+        const latDirection = tags.GPSLatitudeRef;
+        const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+        console.log(latFinal);
+        // Calculate longitude decimal
+        const lonDegree = tags.GPSLongitude[0].numerator/tags.GPSLongitude[0].denominator;
+        const lonMinute = tags.GPSLongitude[1].numerator/tags.GPSLongitude[1].denominator;
+        const lonSecond = tags.GPSLongitude[2].numerator/tags.GPSLongitude[2].denominator;
+        const lonDirection = tags.GPSLongitudeRef;
+        const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+        console.log(lonFinal);
+        
+        const layer = new VectorLayer({
+          title: 'Diltz\' House',
+          source: new olSourceVector({
+            features: [new olFeature({
+              feature_type: ['the lake house'],
+              title: 'the lake house',
+              name: 'the lake house',
+              ...tags,
+              geometry: new olGeomPoint(olProj.fromLonLat([lonFinal, latFinal]))
+            })]
+          })
         })
-      })
-      map.addLayer(layer)
+        map.addLayer(layer)
+        centerAndZoom(map, { y: latFinal, x: lonFinal, zoom: 17.16 })
 
-      centerAndZoom(map, { y: latFinal, x: lonFinal, zoom: 17.16 })
+      } else {
+
+        navigator.geolocation.getCurrentPosition((position) => {
+          const opts = {
+            x: position.coords.longitude,
+            y: position.coords.latitude,
+            zoom: 13,
+            showPointIcon: true
+          }
+          console.log("position", position)
+          const layer = new VectorLayer({
+            title: 'Diltz\' House',
+            source: new olSourceVector({
+              features: [new olFeature({
+                feature_type: ['the lake house'],
+                title: 'the lake house',
+                name: 'the lake house',
+                ...tags,
+                geometry: new olGeomPoint(olProj.fromLonLat([position.coords.longitude, position.coords.latitude]))
+              })]
+            })
+          })
+          map.addLayer(layer)
+          centerAndZoom(map, { y: position.coords.latitude, x: position.coords.longitude, zoom: 17.16 })
+        })
+      }
+
+      
+
     })
 
     
