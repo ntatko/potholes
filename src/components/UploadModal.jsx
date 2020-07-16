@@ -98,7 +98,7 @@ class UploadModal extends Component {
     return (
       <>
         <Dialog
-          open={this.state.open}
+          open={this.props.open}
         >
           <DialogTitle>Upload Pothole Image</DialogTitle>
           <DialogContent>

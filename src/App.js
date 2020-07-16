@@ -1,9 +1,18 @@
 import React from 'react'
 import { Map, Controls, LayerPanel, Popup, centerAndZoom } from '@bayer/ol-kit'
 
+import Sidebar from './components/Sidebar'
 import UploadModal from './components/UploadModal'
 
-class App extends React.Component {
+class App extends React.Component { 
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      showModal: false
+    }
+  }
+
   onMapInit = async map => {
     const opts = {
       x: -89.938355,
@@ -11,6 +20,9 @@ class App extends React.Component {
       zoom: 14,
     }
     centerAndZoom(map, opts)
+  }
+  showModal = () => {
+    this.setState({ showModal: true })
   }
 
   render () {
@@ -21,7 +33,8 @@ class App extends React.Component {
         updateUrlFromView={false}
         updateViewFromUrl={false}
       >
-        <UploadModal />
+        <Sidebar showModal={this.showModal} />
+        {this.state.showModal && <UploadModal open={this.state.showModal} />}
         <Controls />
         <LayerPanel />
         <Popup />
