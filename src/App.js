@@ -41,13 +41,13 @@ class App extends React.Component {
     return (
       <Router>
         <Switch>
-          <Route path="/mobile">
+          <Route path="/">
             <MobileHome />
           </Route>
           <Route path="/mobile-map">
             <MobileMap />
           </Route>
-          <Route path="/">
+          <Route path="/map">
             <Map fullScreen onMapInit={this.onMapInit} >
               <Sidebar showModal={this.showModal} />
               {this.state.showModal && <UploadModal open={this.state.showModal} handleModalClose={() => this.setState({showModal: false})} />}
