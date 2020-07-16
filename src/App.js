@@ -34,7 +34,7 @@ class App extends React.Component {
         updateViewFromUrl={false}
       >
         <Sidebar showModal={this.showModal} />
-        {this.state.showModal && <UploadModal open={this.state.showModal} />}
+        {this.state.showModal && <UploadModal open={this.state.showModal} handleModalClose={() => this.setState({showModal: false})} />}
         <Controls />
         <LayerPanel />
         <Popup />
