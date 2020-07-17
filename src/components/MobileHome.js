@@ -36,6 +36,11 @@ function ConvertDMSToDD(degrees, minutes, seconds, direction) {
 }
 
 class MobileHome extends Component {
+
+  async componentDidMount() {
+    await navigator.permissions.query({name:'geolocation'})
+  }
+  
   handleChange = async stuff => {
     console.log("this is the stuff", stuff.target.files[0])
     console.log("typeof", typeof stuff.target.files)
