@@ -6,7 +6,6 @@ import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
-import Geolocation from 'ol/geolocation';
 
 import Dialog from '@material-ui/core/Dialog'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -99,12 +98,7 @@ class UploadModal extends Component {
           centerAndZoom(map, { y: position.coords.latitude, x: position.coords.longitude, zoom: 17.16 })
         })
       }
-
-      
-
     })
-
-    
 
     this.props.handleModalClose()
   }
