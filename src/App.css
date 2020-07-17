@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.segmented-control > input::nth-child(1):checked ~ label:first-of-type:nth-last-of-type(2)::before {
+  border-radius: 50px;
+}
+
+.segmentedControl::after {
+  border-radius: 50px;
+}

@@ -55,7 +55,7 @@ class App extends React.Component {
             </Map>
           </Route>
           <Route path="/">
-            <MobileHome />
+            <Home />
           </Route>
         </Switch>
       </Router>
