@@ -11,6 +11,7 @@ import Sidebar from './components/Sidebar'
 import UploadModal from './components/UploadModal'
 import MobileHome from './components/MobileHome';
 import MobileMap from './components/MobileMap'
+import Home from './components/Home'
 
 class App extends React.Component { 
   constructor (props) {
