@@ -24,6 +24,10 @@ class App extends React.Component {
 
   async componentDidMount() {
     await navigator.permissions.query({name:'geolocation'})
+
+    window.serviceBindings = {
+      GEOKIT_API_URL: process.env.REACT_APP_GEOKIT_API || 'http://geokit-api.herokuapp.com'
+    }
   }
 
   onMapInit = async map => {
