@@ -42,9 +42,6 @@ class App extends React.Component {
     return (
       <Router>
         <Switch>
-          <Route path="/">
-            <MobileHome />
-          </Route>
           <Route path="/mobile-map">
             <MobileMap />
           </Route>
@@ -56,6 +53,9 @@ class App extends React.Component {
               <LayerPanel />
               <Popup />
             </Map>
+          </Route>
+          <Route path="/">
+            <MobileHome />
           </Route>
         </Switch>
       </Router>

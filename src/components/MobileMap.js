@@ -48,7 +48,7 @@ class MobileMap extends Component {
 
     this.state.map.addLayer(layer)
 
-    this.props.history.push('/mobile')
+    this.props.history.push('/')
   }
 
   onMapInit = map => {

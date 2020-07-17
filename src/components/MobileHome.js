@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import Logo from '../logo.png'
-import Input from '@material-ui/core/Input'
 import EXIF from 'exif-js'
 import { withRouter } from 'react-router-dom'
 
@@ -37,6 +36,11 @@ function ConvertDMSToDD(degrees, minutes, seconds, direction) {
 }
 
 class MobileHome extends Component {
+
+  async componentDidMount() {
+    await navigator.permissions.query({name:'geolocation'})
+  }
+  
   handleChange = async stuff => {
     console.log("this is the stuff", stuff.target.files[0])
     console.log("typeof", typeof stuff.target.files)
@@ -45,23 +49,35 @@ class MobileHome extends Component {
       const tags =  EXIF.getAllTags(this);
       console.log("tags", tags)
 
-      const latDegree = tags.GPSLatitude[0].numerator/tags.GPSLatitude[0].denominator;
-      const latMinute = tags.GPSLatitude[1].numerator/tags.GPSLatitude[1].denominator;
-      const latSecond = tags.GPSLatitude[2].numerator/tags.GPSLatitude[2].denominator;
-      const latDirection = tags.GPSLatitudeRef;
-      const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+      if (tags.GPSLatitude) {
 
-      // Calculate longitude decimal
-      const lonDegree = tags.GPSLongitude[0].numerator/tags.GPSLongitude[0].denominator;
-      const lonMinute = tags.GPSLongitude[1].numerator/tags.GPSLongitude[1].denominator;
-      const lonSecond = tags.GPSLongitude[2].numerator/tags.GPSLongitude[2].denominator;
-      const lonDirection = tags.GPSLongitudeRef;
-      const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+        const latDegree = tags.GPSLatitude[0].numerator/tags.GPSLatitude[0].denominator;
+        const latMinute = tags.GPSLatitude[1].numerator/tags.GPSLatitude[1].denominator;
+        const latSecond = tags.GPSLatitude[2].numerator/tags.GPSLatitude[2].denominator;
+        const latDirection = tags.GPSLatitudeRef;
+        const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+        console.log(latFinal);
+        // Calculate longitude decimal
+        const lonDegree = tags.GPSLongitude[0].numerator/tags.GPSLongitude[0].denominator;
+        const lonMinute = tags.GPSLongitude[1].numerator/tags.GPSLongitude[1].denominator;
+        const lonSecond = tags.GPSLongitude[2].numerator/tags.GPSLongitude[2].denominator;
+        const lonDirection = tags.GPSLongitudeRef;
+        const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+        console.log(lonFinal);
+        
+        props.history.push({
+          pathname: '/mobile-map',
+          state: { y: latFinal, x: lonFinal, zoom: 18 }
+        })
+      } else {
 
-      props.history.push({
-        pathname: '/mobile-map',
-        state: { y: latFinal, x: lonFinal, zoom: 18 }
-      })
+        navigator.geolocation.getCurrentPosition((position) => {
+          props.history.push({
+            pathname: '/mobile-map',
+            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18 }
+          })
+        })
+      }
     })
   }
 
