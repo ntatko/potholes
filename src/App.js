@@ -58,7 +58,7 @@ class App extends React.Component {
               <Popup />
             </Map>
           </Route>
-          <Route path='mobile-upload'>
+          <Route path='/mobile-upload'>
             <MobileHome />
           </Route>
           <Route path="/">
