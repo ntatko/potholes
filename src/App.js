@@ -11,6 +11,7 @@ import Sidebar from './components/Sidebar'
 import UploadModal from './components/UploadModal'
 import MobileHome from './components/MobileHome';
 import MobileMap from './components/MobileMap'
+import Home from './components/Home'
 
 class App extends React.Component { 
   constructor (props) {
@@ -54,7 +55,7 @@ class App extends React.Component {
             </Map>
           </Route>
           <Route path="/">
-            <MobileHome />
+            <Home />
           </Route>
         </Switch>
       </Router>
