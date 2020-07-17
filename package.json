@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node scripts/start.js",
+    "start": "source .env.production && node scripts/start.js",
+    "start:local": "source .env.local && node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "npx eslint src/"
   },
