@@ -9,6 +9,11 @@ import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
 
+import Style from 'ol/style/style'
+import Stroke from 'ol/style/stroke'
+import Circle from 'ol/style/circle'
+import Fill from 'ol/style/fill'
+
 import styled from 'styled-components'
 import '../App.css';
 import { Map, VectorLayer } from '@bayer/ol-kit'
@@ -137,6 +142,23 @@ const MapContainer = styled.div`
   left: unset;
 `
 
+const featureStyle = new Style({
+  stroke: new Stroke({
+    color: 'orange',
+    width: 3
+  }),
+  image: new Circle({
+    radius: 5,
+    fill: new Fill({
+      color: 'white'
+    }),
+    stroke: new Stroke({
+      color: 'orange',
+      width: 5
+    })
+  })
+});
+
 function timeSince(dateTime) {
   const date = new Date(dateTime);
   const seconds = Math.floor((new Date() - date) / 1000);
@@ -168,7 +190,7 @@ class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, potholes: [] }
+    this.state = { activePage: 0, potholes: [], map: null }
   }
 
   async componentDidMount() {
@@ -177,25 +199,37 @@ class Home extends Component {
 
     this.width = rect.width
 
-    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data}))
+    await fetch(url).then(r => r.json()).then(data => {
+      const { map } = this.state
+      this.setState({potholes: data})
+
+      const points = data.map(pothole => {
+        console.log("is this happening?")
+        const feature = new olFeature({
+          feature_type: ['pothole'],
+          title: 'pothole',
+          name: 'pothole',
+          id: pothole.id,
+          ...pothole,
+          geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
+        })
+        return feature
+      })
+      const layer = map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
+      layer && points.forEach(point => {
+        layer.getSource().addFeature(point)
+      })
+    })
   }
 
   onMapInit = (map) => {
-    const points = this.state.potholes.map(pothole => {
-      const feature = new olFeature({
-        feature_type: ['pothole'],
-        title: 'pothole',
-        name: 'pothole',
-        id: pothole.id,
-        ...pothole,
-        geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
-      })
-      return feature
-    })
+    this.setState({ map })
+    console.log("loading", this.state.potholes)
+    
     const layer = new VectorLayer({
-      title: 'Diltz\' House',
+      title: 'Potholes',
       source: new olSourceVector({
-        features: points
+        features: []
       })
     })
     map.addLayer(layer)
@@ -246,7 +280,7 @@ class Home extends Component {
             </CardContent>
           </Card>
           { this.state.potholes.map((pothole) => (
-            <Card className="card horizontal">
+            <Card className="card horizontal" key={pothole.id}>
               <div className="card-image">
                 <Image src={pothole.image_url} />
               </div>
@@ -260,7 +294,7 @@ class Home extends Component {
           
         </Content>
         <MapContainer activePage={this.state.activePage} width={this.width}>
-          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} fullscreen={false}>
+          <Map onMapInit={this.onMapInit.bind(this)} updateUrlFromView={false} updateViewFromUrl={false} fullscreen={false}>
           </Map>
         </MapContainer>
       </div>
