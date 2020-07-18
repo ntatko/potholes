@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { SegmentedControl } from 'segmented-control'
 
 import potholeone from '../potholeone.png'
 import pothole2 from '../pothole2.png'
@@ -25,6 +24,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: scroll;
 `
 
 const pillContainer = {
@@ -65,6 +65,7 @@ const PillText = styled.p`
 const Card = styled.div`
   width: 90%;
   height: 90px;
+  min-height: 90px;
   border-radius: 15px;
   overflow: hidden;
 `
@@ -109,14 +110,49 @@ const PageTitle = styled.h5`
   color: #424242;
 `
 
+function timeSince(dateTime) {
+  const date = new Date(dateTime);
+
+  var seconds = Math.floor((new Date() - date) / 1000);
+
+  var interval = Math.floor(seconds / 31536000);
+
+  if (interval > 1) {
+    return interval + " years";
+  }
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) {
+    return interval + " months";
+  }
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) {
+    return interval + " days";
+  }
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) {
+    return interval + " hours";
+  }
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) {
+    return interval + " minutes";
+  }
+  return Math.floor(seconds) + " seconds";
+}
+
 class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0 }
+    this.state = { activePage: 0, potholes: [] }
+  }
+
+  async componentDidMount() {
+    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
+    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data}))
   }
 
   render () {
+    console.log(this.state.potholes)
     return (
       <div style={container}>
         <Header>
@@ -157,6 +193,18 @@ class Home extends Component {
               <CardFooter color='lightgray'>Added 8 days ago</CardFooter>
             </CardContent>
           </Card>
+          { this.state.potholes.map((pothole) => (
+            <Card className="card horizontal">
+              <div className="card-image">
+                <Image src={pothole.image_url} />
+              </div>
+              <CardContent>
+                <CardTitle>Pothole</CardTitle>
+                <CardFooter color='gray'>{pothole.address}</CardFooter>
+                <CardFooter color='lightgray'>Added {timeSince(pothole.createddate)} ago</CardFooter>
+              </CardContent>
+            </Card>
+          ))}
         </Content>
       </div>
     )

@@ -34,19 +34,31 @@ const icon = {
 
 
 class MobileMap extends Component {
-  handleClick = () => {
-    console.log(this.props)
+  handleClick = async () => {
 
-    const layer = new VectorLayer({
-      title: 'Diltz\' House',
-      source: new olSourceVector({
-        features: [new olFeature({
-          geometry: new olGeomPoint(this.state.map.getView().getCenter())
-        })]
-      })
+    const [lat, long] = olProj.transform(this.state.map.getView().getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const key = "82OD8xUAEGtjlGG8QmixjVe90rErA3NU"
+
+    const response = await fetch(`http://open.mapquestapi.com/geocoding/v1/reverse?key=${key}&location=${long},${lat}&includeStreet=true`)
+    const address = await response.json()
+
+    const potholeData = {
+      long,
+      lat,
+      priority: 'low',
+      address: address.results[0].locations[0].street,
+      imageUrl: "https://picsum.photos/500" // Just gotta make this a real photo :P
+    }
+
+    const url = window.serviceBindings.GEOKIT_API_URL + '/report/'
+
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(potholeData)
     })
-
-    this.state.map.addLayer(layer)
 
     this.props.history.push('/')
   }

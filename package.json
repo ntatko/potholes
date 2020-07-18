@@ -68,7 +68,6 @@
     "resolve": "1.15.0",
     "resolve-url-loader": "3.1.1",
     "sass-loader": "8.0.2",
-    "segmented-control": "^0.1.12",
     "semver": "6.3.0",
     "style-loader": "0.23.1",
     "styled-components": "^5.1.1",
