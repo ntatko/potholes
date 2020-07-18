@@ -12,13 +12,16 @@ import UploadModal from './components/UploadModal'
 import MobileHome from './components/MobileHome';
 import MobileMap from './components/MobileMap'
 import Home from './components/Home'
+import SplashScreen from './components/SplashScreen';
 
 class App extends React.Component { 
   constructor (props) {
     super(props)
 
     this.state = {
-      showModal: false
+      showModal: false,
+      showSplashScreen: true,
+      potholes: []
     }
 
     window.serviceBindings = {
@@ -28,7 +31,9 @@ class App extends React.Component {
 
   async componentDidMount() {
     await navigator.permissions.query({name:'geolocation'})
+    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
 
+    await fetch(url).then(r => r.json()).then(data => this.setState({ potholes: data, showSplashScreen: false }))
   }
 
   onMapInit = async map => {
@@ -63,7 +68,7 @@ class App extends React.Component {
             <MobileHome />
           </Route>
           <Route path="/">
-            <Home />
+            {this.state.showSplashScreen ? <SplashScreen /> : <Home potholes={this.state.potholes} />}
           </Route>
         </Switch>
       </Router>

@@ -170,20 +170,17 @@ class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, potholes: [] }
+    this.state = { activePage: 0, width: 400 }
   }
 
-  async componentDidMount() {
-    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
-    const rect = document.getElementById('page-content').getBoundingClientRect()
+  componentDidMount () {
+    const { width } = document.getElementById('page-content').getBoundingClientRect()
 
-    this.width = rect.width
-
-    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data}))
+    this.setState({ width })
   }
 
   onMapInit = (map) => {
-    const points = this.state.potholes.map(pothole => {
+    const points = this.props.potholes.map(pothole => {
       const feature = new olFeature({
         feature_type: ['pothole'],
         title: 'pothole',
@@ -206,7 +203,7 @@ class Home extends Component {
   }
 
   render () {
-    console.log(this.state.potholes)
+    console.log(this.props.potholes)
     return (
       <div style={container} id='page-content'>
         <Header>
@@ -219,7 +216,7 @@ class Home extends Component {
             <Slider activePage={this.state.activePage} />
           </PillContainer>
         </Header>
-        <Content  activePage={this.state.activePage} width={this.width}>
+        <Content  activePage={this.state.activePage} width={this.state.width}>
           <Card className="card horizontal">
             <div className="card-image">
               <Image src={potholeone} />
@@ -247,7 +244,7 @@ class Home extends Component {
               <CardFooter color='lightgray'>Added 8 days ago</CardFooter>
             </CardContent>
           </Card>
-          { this.state.potholes.map((pothole) => (
+          { this.props.potholes.map((pothole) => (
             <Card className="card horizontal">
               <div className="card-image">
                 <Image src={pothole.image_url} />
@@ -261,7 +258,7 @@ class Home extends Component {
           ))}
           
         </Content>
-        <MapContainer activePage={this.state.activePage} width={this.width}>
+        <MapContainer activePage={this.state.activePage} width={this.state.width}>
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} fullscreen={false}>
           </Map>
         </MapContainer>
