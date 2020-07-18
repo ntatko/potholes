@@ -28,6 +28,7 @@ const Header = styled.div`
 
 const Content = styled.div`
   height: 70%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow: scroll;
@@ -78,6 +79,7 @@ const Card = styled.div`
   min-height: 90px;
   border-radius: 15px;
   overflow: hidden;
+  max-width: 600px;
 `
 
 const Image = styled.img`
