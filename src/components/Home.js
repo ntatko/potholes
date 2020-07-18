@@ -9,11 +9,6 @@ import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
 
-import Style from 'ol/style/style'
-import Stroke from 'ol/style/stroke'
-import Circle from 'ol/style/circle'
-import Fill from 'ol/style/fill'
-
 import styled from 'styled-components'
 import '../App.css';
 import { Map, VectorLayer } from '@bayer/ol-kit'
@@ -141,23 +136,6 @@ const MapContainer = styled.div`
   bottom: unset;
   left: unset;
 `
-
-const featureStyle = new Style({
-  stroke: new Stroke({
-    color: 'orange',
-    width: 3
-  }),
-  image: new Circle({
-    radius: 5,
-    fill: new Fill({
-      color: 'white'
-    }),
-    stroke: new Stroke({
-      color: 'orange',
-      width: 5
-    })
-  })
-});
 
 function timeSince(dateTime) {
   const date = new Date(dateTime);

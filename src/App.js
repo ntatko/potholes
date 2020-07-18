@@ -3,8 +3,7 @@ import { Map, Controls, LayerPanel, Popup, centerAndZoom } from '@bayer/ol-kit'
 import {
   BrowserRouter as Router,
   Switch,
-  Route,
-  Link
+  Route
 } from "react-router-dom";
 
 import Sidebar from './components/Sidebar'

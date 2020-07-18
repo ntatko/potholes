@@ -1,10 +1,6 @@
 import React, { Component } from 'react'
-import { Map, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
+import { Map, centerAndZoom } from '@bayer/ol-kit'
 import { withRouter } from 'react-router-dom'
-
-import olSourceVector from 'ol/source/vector'
-import olFeature from 'ol/feature'
-import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
 
 const container = {
