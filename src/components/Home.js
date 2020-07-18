@@ -20,17 +20,21 @@ const container = {
 const Header = styled.div`
   height: 30%;
   display: flex;
+  align-items: center;
   justify-content: center;
   flex-direction: column;
-  align-items: center;
+
 `
 
 const Content = styled.div`
   height: 70%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   overflow: scroll;
+  align-items: center;
+  left: ${props => props.activePage === 0 ? '0' : `-${props.width}px`};
+  transition: all .3s;
+  position: absolute;
 `
 
 const pillContainer = {
@@ -116,6 +120,17 @@ const PageTitle = styled.h5`
   color: #424242;
 `
 
+const MapContainer = styled.div`
+  height: 70%;
+  width: 100%;
+  position: absolute;
+  right: ${props => props.activePage === 0 ? `-${props.width}px` : '0'};
+  transition: all .3s;
+  top: 30%;
+  bottom: unset;
+  left: unset;
+`
+
 function timeSince(dateTime) {
   const date = new Date(dateTime);
 
@@ -154,7 +169,11 @@ class Home extends Component {
 
   async componentDidMount() {
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
-    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data}))
+    const { width } = document.getElementById('page-content').getBoundingClientRect()
+
+    console.log(width)
+
+    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data, width}))
   }
 
   onMapInit = (map) => {
@@ -183,7 +202,7 @@ class Home extends Component {
   render () {
     console.log(this.state.potholes)
     return (
-      <div style={container}>
+      <div style={container} id='page-content'>
         <Header>
           <PageTitle style={{ margin: '30px 0px' }}>Road Improvements</PageTitle>
           <div style={pillContainer}>
@@ -194,7 +213,7 @@ class Home extends Component {
             <Slider activePage={this.state.activePage} />
           </div>
         </Header>
-        {this.state.activePage === 0 && (<Content>
+        <Content  activePage={this.state.activePage} width={this.state.width}>
           <Card className="card horizontal">
             <div className="card-image">
               <Image src={potholeone} />
@@ -234,11 +253,12 @@ class Home extends Component {
               </CardContent>
             </Card>
           ))}
-        </Content>)}
-        {this.state.activePage === 1 && (
-          <Map style={{height: '70%', width: '100%'}} onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
+          
+        </Content>
+        <MapContainer activePage={this.state.activePage} width={this.state.width}>
+          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} fullscreen={false}>
           </Map>
-        )}
+        </MapContainer>
       </div>
     )
   }
