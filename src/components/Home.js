@@ -175,11 +175,11 @@ class Home extends Component {
 
   async componentDidMount() {
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
-    const { width } = document.getElementById('page-content').getBoundingClientRect()
+    const rect = document.getElementById('page-content').getBoundingClientRect()
 
-    console.log(width)
+    this.width = rect.width
 
-    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data, width}))
+    await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data}))
   }
 
   onMapInit = (map) => {
@@ -219,7 +219,7 @@ class Home extends Component {
             <Slider activePage={this.state.activePage} />
           </PillContainer>
         </Header>
-        <Content  activePage={this.state.activePage} width={this.state.width}>
+        <Content  activePage={this.state.activePage} width={this.width}>
           <Card className="card horizontal">
             <div className="card-image">
               <Image src={potholeone} />
@@ -261,7 +261,7 @@ class Home extends Component {
           ))}
           
         </Content>
-        <MapContainer activePage={this.state.activePage} width={this.state.width}>
+        <MapContainer activePage={this.state.activePage} width={this.width}>
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} fullscreen={false}>
           </Map>
         </MapContainer>
