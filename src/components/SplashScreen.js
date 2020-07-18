@@ -7,6 +7,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  transition-timing-function: ease;
 `
 
 class SplashScreen extends Component {

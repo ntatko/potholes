@@ -1,10 +1,6 @@
 import React, { Component } from 'react'
-import { Map, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
+import { Map, centerAndZoom } from '@bayer/ol-kit'
 import { withRouter } from 'react-router-dom'
-
-import olSourceVector from 'ol/source/vector'
-import olFeature from 'ol/feature'
-import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
 
 const container = {
@@ -36,10 +32,10 @@ const icon = {
 class MobileMap extends Component {
   handleClick = async () => {
 
-    const [lat, long] = olProj.transform(this.state.map.getView().getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const [long, lat] = olProj.transform(this.state.map.getView().getCenter(), 'EPSG:3857', 'EPSG:4326')
     const key = "82OD8xUAEGtjlGG8QmixjVe90rErA3NU"
 
-    const response = await fetch(`http://open.mapquestapi.com/geocoding/v1/reverse?key=${key}&location=${long},${lat}&includeStreet=true`)
+    const response = await fetch(`http://open.mapquestapi.com/geocoding/v1/reverse?key=${key}&location=${lat},${long}&includeStreet=true`)
     const address = await response.json()
 
     const potholeData = {

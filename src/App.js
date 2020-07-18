@@ -3,8 +3,7 @@ import { Map, Controls, LayerPanel, Popup, centerAndZoom } from '@bayer/ol-kit'
 import {
   BrowserRouter as Router,
   Switch,
-  Route,
-  Link
+  Route
 } from "react-router-dom";
 
 import Sidebar from './components/Sidebar'
@@ -20,12 +19,12 @@ class App extends React.Component {
 
     this.state = {
       showModal: false,
-      showSplashScreen: true,
-      potholes: []
+      potholes: [],
+      showSplashScreen: true
     }
 
     window.serviceBindings = {
-      GEOKIT_API_URL: process.env.REACT_APP_GEOKIT_API || 'http://geokit-api.herokuapp.com'
+      GEOKIT_API_URL: process.env.REACT_APP_GEOKIT_API || 'https://geokit-api.herokuapp.com'
     }
   }
 
@@ -33,7 +32,9 @@ class App extends React.Component {
     await navigator.permissions.query({name:'geolocation'})
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
 
-    await fetch(url).then(r => r.json()).then(data => this.setState({ potholes: data, showSplashScreen: false }))
+    await fetch(url).then(r => r.json()).then(data => {
+      this.setState({potholes: data, showSplashScreen: false})
+    })
   }
 
   onMapInit = async map => {

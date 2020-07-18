@@ -8,6 +8,9 @@ import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
+import olStyleStyle from 'ol/style/style'
+import olStyleFill from 'ol/style/fill'
+import olStyleStroke from 'ol/style/stroke'
 
 import styled from 'styled-components'
 import '../App.css';
@@ -139,10 +142,8 @@ const MapContainer = styled.div`
 
 function timeSince(dateTime) {
   const date = new Date(dateTime);
-
-  var seconds = Math.floor((new Date() - date) / 1000);
-
-  var interval = Math.floor(seconds / 31536000);
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = Math.floor(seconds / 31536000);
 
   if (interval > 1) {
     return interval + " years";
@@ -170,7 +171,7 @@ class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, width: 400 }
+    this.state = { activePage: 0, potholes: [], map: null, width: 400 }
   }
 
   componentDidMount () {
@@ -180,6 +181,17 @@ class Home extends Component {
   }
 
   onMapInit = (map) => {
+    this.setState({ map })
+    console.log("loading", this.state.potholes)
+    
+    const layer = new VectorLayer({
+      title: 'Potholes',
+      source: new olSourceVector({
+        features: []
+      })
+    })
+    map.addLayer(layer)
+
     const points = this.props.potholes.map(pothole => {
       const feature = new olFeature({
         feature_type: ['pothole'],
@@ -191,13 +203,14 @@ class Home extends Component {
       })
       return feature
     })
-    const layer = new VectorLayer({
-      title: 'Diltz\' House',
-      source: new olSourceVector({
-        features: points
-      })
+
+    layer && points.forEach(point => {
+      point.setStyle(new olStyleStyle({
+        fill: new olStyleFill({ color: 'blue' }),
+        stroke: new olStyleStroke({ color: 'blue' })
+      }))
+      layer.getSource().addFeature(point)
     })
-    map.addLayer(layer)
 
     window.map = map
   }
