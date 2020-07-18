@@ -38,13 +38,17 @@ const Content = styled.div`
   position: absolute;
 `
 
-const pillContainer = {
-  width: '135px',
-  background: '#ececec',
-  borderRadius: '50px',
-  height: '30px',
-  position: 'relative'
-}
+const PillContainer = styled.div`
+  width: 135px;
+  background: rgb(236, 236, 236);
+  border-radius: 50px;
+  height: 30px;
+  position: relative;
+
+  &:hover {
+    cursor: pointer;
+  }
+`
 
 const pill = {
   display: 'flex',
@@ -207,13 +211,13 @@ class Home extends Component {
       <div style={container} id='page-content'>
         <Header>
           <PageTitle style={{ margin: '30px 0px' }}>Road Improvements</PageTitle>
-          <div style={pillContainer}>
+          <PillContainer>
             <div style={pill}>
               <PillText onClick={() => this.setState({ activePage: 0 })}>LIST</PillText>
               <PillText onClick={() => this.setState({ activePage: 1 })}>MAP</PillText>
             </div>
             <Slider activePage={this.state.activePage} />
-          </div>
+          </PillContainer>
         </Header>
         <Content  activePage={this.state.activePage} width={this.state.width}>
           <Card className="card horizontal">
