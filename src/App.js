@@ -22,7 +22,7 @@ class App extends React.Component {
     }
 
     window.serviceBindings = {
-      GEOKIT_API_URL: process.env.REACT_APP_GEOKIT_API || 'http://geokit-api.herokuapp.com'
+      GEOKIT_API_URL: process.env.REACT_APP_GEOKIT_API || 'https://geokit-api.herokuapp.com'
     }
   }
 
