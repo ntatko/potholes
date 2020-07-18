@@ -11,7 +11,6 @@ import UploadModal from './components/UploadModal'
 import MobileHome from './components/MobileHome';
 import MobileMap from './components/MobileMap'
 import Home from './components/Home'
-import SplashScreen from './components/SplashScreen';
 
 class App extends React.Component { 
   constructor (props) {
@@ -69,7 +68,7 @@ class App extends React.Component {
             <MobileHome />
           </Route>
           <Route path="/">
-            {this.state.showSplashScreen ? <SplashScreen /> : <Home potholes={this.state.potholes} />}
+            <Home potholes={this.state.potholes} />
           </Route>
         </Switch>
       </Router>
