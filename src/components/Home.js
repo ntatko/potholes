@@ -4,8 +4,14 @@ import potholeone from '../potholeone.png'
 import pothole2 from '../pothole2.png'
 import pothole3 from '../pothole3.png'
 
+import olSourceVector from 'ol/source/vector'
+import olFeature from 'ol/feature'
+import olGeomPoint from 'ol/geom/point'
+import olProj from 'ol/proj'
+
 import styled from 'styled-components'
 import '../App.css';
+import { Map, VectorLayer } from '@bayer/ol-kit'
 
 const container = {
   height: '100%'
@@ -151,6 +157,29 @@ class Home extends Component {
     await fetch(url).then(r => r.json()).then(data => this.setState({potholes: data}))
   }
 
+  onMapInit = (map) => {
+    const points = this.state.potholes.map(pothole => {
+      const feature = new olFeature({
+        feature_type: ['pothole'],
+        title: 'pothole',
+        name: 'pothole',
+        id: pothole.id,
+        ...pothole,
+        geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
+      })
+      return feature
+    })
+    const layer = new VectorLayer({
+      title: 'Diltz\' House',
+      source: new olSourceVector({
+        features: points
+      })
+    })
+    map.addLayer(layer)
+
+    window.map = map
+  }
+
   render () {
     console.log(this.state.potholes)
     return (
@@ -165,7 +194,7 @@ class Home extends Component {
             <Slider activePage={this.state.activePage} />
           </div>
         </Header>
-        <Content>
+        {this.state.activePage === 0 && (<Content>
           <Card className="card horizontal">
             <div className="card-image">
               <Image src={potholeone} />
@@ -205,7 +234,11 @@ class Home extends Component {
               </CardContent>
             </Card>
           ))}
-        </Content>
+        </Content>)}
+        {this.state.activePage === 1 && (
+          <Map style={{height: '70%', width: '100%'}} onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
+          </Map>
+        )}
       </div>
     )
   }
