@@ -14,7 +14,7 @@ import olStyleStroke from 'ol/style/stroke'
 
 import styled from 'styled-components'
 import '../App.css';
-import { Map, VectorLayer } from '@bayer/ol-kit'
+import { Map, VectorLayer, centerAndZoom, LayerPanel } from '@bayer/ol-kit'
 
 const container = {
   height: '100%'
@@ -175,48 +175,68 @@ class Home extends Component {
   }
 
   componentDidMount () {
+    
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
     this.setState({ width })
+
+    
+
+    
   }
 
-  onMapInit = (map) => {
-    this.setState({ map })
-    console.log("loading", this.state.potholes)
+  componentWillReceiveProps (nextProps) {
+    const { map } = this.state
+
+    if (this.props.potholes.length) {
+      const layer = new VectorLayer({
+        title: 'Potholes',
+        source: new olSourceVector({
+          features: this.props.potholes.map(pothole => {
+            return new olFeature({
+              feature_type: ['pothole'],
+              title: 'pothole',
+              name: 'pothole',
+              id: pothole.id,
+              ...pothole,
+              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lat, pothole.location_lon]))
+            })
+        }).concat(new olFeature({
+             feature_type: ['the lake house'],
+            title: 'the lake house',
+            name: 'the lake house',
+            geometry: new olGeomPoint(olProj.fromLonLat([-89.940598, 38.923107]))
+          })).filter(feature => !feature.getGeometry().getCoordinates().includes(NaN))
+      })
+    })
+
     
-    const layer = new VectorLayer({
-      title: 'Potholes',
-      source: new olSourceVector({
-        features: []
-      })
-    })
-    map.addLayer(layer)
 
-    const points = this.props.potholes.map(pothole => {
-      const feature = new olFeature({
-        feature_type: ['pothole'],
-        title: 'pothole',
-        name: 'pothole',
-        id: pothole.id,
-        ...pothole,
-        geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
-      })
-      return feature
-    })
+      // layer.setStyle(new olStyleStyle({
+      //   fill: new olStyleFill({ color: 'red' }),
+      //   stroke: new olStyleStroke({ color: 'red' })
+      // }))
 
-    layer && points.forEach(point => {
-      point.setStyle(new olStyleStyle({
-        fill: new olStyleFill({ color: 'blue' }),
-        stroke: new olStyleStroke({ color: 'blue' })
-      }))
-      layer.getSource().addFeature(point)
-    })
+      map.addLayer(layer)
+    }
+      
+  }
+  
+
+  onMapInit = (map) => {
+    const opts = {
+      x: -89.938355,
+      y: 38.923748,
+      zoom: 14,
+    }
+    centerAndZoom(map, opts)
+
+    this.setState({ map })
 
     window.map = map
   }
 
   render () {
-    console.log(this.props.potholes)
     return (
       <div style={container} id='page-content'>
         <Header>
@@ -272,7 +292,7 @@ class Home extends Component {
           
         </Content>
         <MapContainer activePage={this.state.activePage} width={this.state.width}>
-          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} fullscreen={false}>
+          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
           </Map>
         </MapContainer>
       </div>

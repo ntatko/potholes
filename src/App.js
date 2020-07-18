@@ -18,8 +18,7 @@ class App extends React.Component {
 
     this.state = {
       showModal: false,
-      potholes: [],
-      showSplashScreen: true
+      potholes: []
     }
 
     window.serviceBindings = {
@@ -32,20 +31,10 @@ class App extends React.Component {
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
 
     await fetch(url).then(r => r.json()).then(data => {
-      this.setState({potholes: data, showSplashScreen: false})
-    })
-  }
+      this.setState({ potholes: data })
 
-  onMapInit = async map => {
-    const opts = {
-      x: -89.938355,
-      y: 38.923748,
-      zoom: 14,
-    }
-    centerAndZoom(map, opts)
-  }
-  showModal = () => {
-    this.setState({ showModal: true })
+      this.forceUpdate()
+    })
   }
 
   render () {
@@ -54,15 +43,6 @@ class App extends React.Component {
         <Switch>
           <Route path="/mobile-map">
             <MobileMap />
-          </Route>
-          <Route path="/map">
-            <Map fullScreen onMapInit={this.onMapInit} >
-              <Sidebar showModal={this.showModal} />
-              {this.state.showModal && <UploadModal open={this.state.showModal} handleModalClose={() => this.setState({showModal: false})} />}
-              <Controls />
-              <LayerPanel />
-              <Popup />
-            </Map>
           </Route>
           <Route path='/mobile-upload'>
             <MobileHome />
