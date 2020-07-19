@@ -35,7 +35,7 @@ class MobileMap extends Component {
     const [long, lat] = olProj.transform(this.state.map.getView().getCenter(), 'EPSG:3857', 'EPSG:4326')
     const key = "82OD8xUAEGtjlGG8QmixjVe90rErA3NU"
 
-    const response = await fetch(`http://open.mapquestapi.com/geocoding/v1/reverse?key=${key}&location=${lat},${long}&includeStreet=true`)
+    const response = await fetch(`https://open.mapquestapi.com/geocoding/v1/reverse?key=${key}&location=${lat},${long}&includeStreet=true`)
     const address = await response.json()
 
     const potholeData = {

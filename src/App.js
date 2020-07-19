@@ -1,13 +1,10 @@
 import React from 'react'
-import { Map, Controls, LayerPanel, Popup, centerAndZoom } from '@bayer/ol-kit'
 import {
   BrowserRouter as Router,
   Switch,
   Route
 } from "react-router-dom";
 
-import Sidebar from './components/Sidebar'
-import UploadModal from './components/UploadModal'
 import MobileHome from './components/MobileHome';
 import MobileMap from './components/MobileMap'
 import Home from './components/Home'
