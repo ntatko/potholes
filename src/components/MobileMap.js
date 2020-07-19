@@ -68,7 +68,7 @@ class MobileMap extends Component {
 
   render () {
     return (
-      <Map fullScreen onMapInit={this.onMapInit}>
+      <Map fullScreen onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
         <div style={container}>
           <i style={icon} className="medium material-icons">place</i>
           <button style={button} onClick={this.handleClick} className='waves-effect waves-light btn'>Looks Good</button>
