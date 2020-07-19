@@ -53,7 +53,7 @@ class MobileHome extends Component {
         let fileParts = stuff.target.files[0].name.split('.');
         let fileType = fileParts[1];
         console.log("Preparing the upload");
-        axios.post("http://localhost:3001/getSignedUrl",{
+        axios.post("https://geokit-api.herokuapp.com/getSignedUrl",{
           fileName : `${new Date().toISOString()}-${UUID()}`,
           fileType : `${stuff.target.files[0].name.split('.')[1]}`
         })
