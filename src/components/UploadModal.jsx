@@ -13,12 +13,10 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 
 import Input from '@material-ui/core/Input'
 import Typography from '@material-ui/core/Typography'
-const fs = require('fs')
-
 
 function ConvertDMSToDD(degrees, minutes, seconds, direction) {
   var dd = degrees + (minutes/60) + (seconds/3600);
-  if (direction == "S" || direction == "W") {
+  if (direction === "S" || direction === "W") {
       dd = dd * -1; 
   }
   return dd;
@@ -75,12 +73,6 @@ class UploadModal extends Component {
       } else {
 
         navigator.geolocation.getCurrentPosition((position) => {
-          const opts = {
-            x: position.coords.longitude,
-            y: position.coords.latitude,
-            zoom: 13,
-            showPointIcon: true
-          }
           console.log("position", position)
           const layer = new VectorLayer({
             title: 'Diltz\' House',
