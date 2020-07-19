@@ -8,13 +8,10 @@ import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
-import olStyleStyle from 'ol/style/style'
-import olStyleFill from 'ol/style/fill'
-import olStyleStroke from 'ol/style/stroke'
 
 import styled from 'styled-components'
 import '../App.css';
-import { Map, VectorLayer, centerAndZoom, LayerPanel } from '@bayer/ol-kit'
+import { Map, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
 
 const container = {
   height: '100%'
@@ -178,11 +175,7 @@ class Home extends Component {
     
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
-    this.setState({ width })
-
-    
-
-    
+    this.setState({ width })    
   }
 
   componentWillReceiveProps (nextProps) {
@@ -199,23 +192,16 @@ class Home extends Component {
               name: 'pothole',
               id: pothole.id,
               ...pothole,
-              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lat, pothole.location_lon]))
+              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
             })
         }).concat(new olFeature({
-             feature_type: ['the lake house'],
-            title: 'the lake house',
-            name: 'the lake house',
+            feature_type: ['pothole'],
+            title: 'Potholes',
+            name: 'Pothole',
             geometry: new olGeomPoint(olProj.fromLonLat([-89.940598, 38.923107]))
           })).filter(feature => !feature.getGeometry().getCoordinates().includes(NaN))
       })
     })
-
-    
-
-      // layer.setStyle(new olStyleStyle({
-      //   fill: new olStyleFill({ color: 'red' }),
-      //   stroke: new olStyleStroke({ color: 'red' })
-      // }))
 
       map.addLayer(layer)
     }
@@ -278,7 +264,7 @@ class Home extends Component {
             </CardContent>
           </Card>
           { this.props.potholes.map((pothole) => (
-            <Card className="card horizontal">
+            <Card className="card horizontal" key={pothole.id}>
               <div className="card-image">
                 <Image src={pothole.image_url} />
               </div>
