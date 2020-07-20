@@ -1,8 +1,12 @@
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom'
 
 import potholeone from '../potholeone.png'
 import pothole2 from '../pothole2.png'
 import pothole3 from '../pothole3.png'
+
+import EXIF from 'exif-js'
+import { v4 as UUID } from 'uuid'
 
 import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
@@ -14,6 +18,7 @@ import olStyleCircle from 'ol/style/circle'
 import olStyleStroke from 'ol/style/stroke'
 
 import colormap from 'colormap'
+import axios from 'axios'
 
 import styled from 'styled-components'
 import '../App.css';
@@ -21,6 +26,23 @@ import { Map, VectorLayer, centerAndZoom, Popup } from '@bayer/ol-kit'
 
 const container = {
   height: '100%'
+}
+
+const button = {
+  backgroundColor: '#231f20',
+  width: '100%',
+  borderRadius: '8px',
+  height: '3.3em',
+  fontWeight: '700',
+  boxShadow: 'rgba(0, 0, 0, 0.81) 0 10px 25px 0px'
+}
+
+function ConvertDMSToDD(degrees, minutes, seconds, direction) {
+  var dd = degrees + (minutes/60) + (seconds/3600);
+  if (direction === "S" || direction === "W") {
+      dd = dd * -1; 
+  }
+  return dd;
 }
 
 const Header = styled.div`
@@ -193,13 +215,6 @@ class Home extends Component {
   componentWillReceiveProps (nextProps) {
     const { map } = this.state
 
-    const orderedPotholes = this.props.potholes.sort((a, b) => new Date(a.createddate) - new Date(b.createddate))
-
-    const ramp = colormap({
-      nshades: this.props.potholes.length,
-      colormap: 'freesurface-blue'
-    })
-
     if (this.props.potholes.length) {
       const layer = new VectorLayer({
         title: 'Potholes',
@@ -213,9 +228,7 @@ class Home extends Component {
             })
           })
 
-          const idx = orderedPotholes.findIndex(p => feature.get('id') === p.id)
 
-          console.log(idx, ramp[idx])
           return new olStyleStyle({
             image: new olStyleCircle({
               radius: 5,
@@ -247,6 +260,78 @@ class Home extends Component {
       map.addLayer(layer)
     }
       
+  }
+
+  handleChange = async stuff => {
+    console.log("this is the stuff", stuff.target.files[0])
+    const props = this.props
+
+    // upload to AWS
+    const file = stuff.target.files[0];
+    // Split the filename to get the name and type
+    const fileParts = stuff.target.files[0].name.split('.');
+    const fileType = fileParts[1];
+    console.log("Preparing the upload");
+    try {
+      this.setState({ loading: true })
+      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
+        fileName: `${new Date().toISOString()}-${UUID()}`,
+        fileType
+      })
+      const returnData = response.data.data.returnData;
+      const signedRequest = returnData.signedRequest;
+      const url = returnData.url;
+      this.setState({ url })
+      console.log("Recieved a signed request", signedRequest, url);
+      
+      // Put the fileType in the headers for the upload
+      var options = {
+        headers: {
+          'Content-Type': 'image/jpeg'
+        }
+      };
+      // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
+      const result = await axios.put(signedRequest, file, options)
+      console.log("Response from s3", result)
+      this.setState({success: true});
+    } catch (err) {
+      console.error(err)
+    }
+
+    EXIF.getData(file, function() {
+      const tags =  EXIF.getAllTags(this);
+      console.log("tags", tags)
+
+      if (tags.GPSLatitude) {
+
+        const latDegree = tags.GPSLatitude[0].numerator/tags.GPSLatitude[0].denominator;
+        const latMinute = tags.GPSLatitude[1].numerator/tags.GPSLatitude[1].denominator;
+        const latSecond = tags.GPSLatitude[2].numerator/tags.GPSLatitude[2].denominator;
+        const latDirection = tags.GPSLatitudeRef;
+        const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+        console.log(latFinal);
+        // Calculate longitude decimal
+        const lonDegree = tags.GPSLongitude[0].numerator/tags.GPSLongitude[0].denominator;
+        const lonMinute = tags.GPSLongitude[1].numerator/tags.GPSLongitude[1].denominator;
+        const lonSecond = tags.GPSLongitude[2].numerator/tags.GPSLongitude[2].denominator;
+        const lonDirection = tags.GPSLongitudeRef;
+        const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+        console.log(lonFinal);
+        
+        props.history.push({
+          pathname: '/mobile-map',
+          state: { y: latFinal, x: lonFinal, zoom: 18 }
+        })
+      } else {
+
+        navigator.geolocation.getCurrentPosition((position) => {
+          props.history.push({
+            pathname: '/mobile-map',
+            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18 }
+          })
+        })
+      }
+    })
   }
   
 
@@ -296,9 +381,18 @@ class Home extends Component {
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
           </Map>
         </MapContainer>
+
+        <a
+          style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
+          onClick={() => document.getElementById('file-upload').click()}
+          class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">add</i></a>
+          <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
+            this.handleChange(e)
+            this.setState({ open: false })
+          }} />
       </div>
     )
   }
 }
 
-export default Home
+export default withRouter(Home)
