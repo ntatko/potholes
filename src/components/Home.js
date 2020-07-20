@@ -13,8 +13,6 @@ import olStyleFill from 'ol/style/fill'
 import olStyleCircle from 'ol/style/circle'
 import olStyleStroke from 'ol/style/stroke'
 
-import axios from 'axios'
-
 import styled from 'styled-components'
 import '../App.css';
 import { Map, VectorLayer, centerAndZoom, Popup } from '@bayer/ol-kit'
