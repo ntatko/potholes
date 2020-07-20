@@ -262,36 +262,6 @@ class Home extends Component {
 
     console.log(position)
 
-    let url
-
-    // upload to AWS
-    // Split the filename to get the name and type
-    const fileParts = file.name.split('.');
-    const fileType = fileParts[1];
-    console.log("Preparing the upload");
-    try {
-      this.setState({ loading: true })
-      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
-        fileName: `${new Date().toISOString()}-${UUID()}`,
-        fileType
-      })
-      const returnData = response.data.data.returnData;
-      const signedRequest = returnData.signedRequest;
-      
-      // Put the fileType in the headers for the upload
-      var options = {
-        headers: {
-          'Content-Type': 'image/jpeg'
-        }
-      };
-      const result = await axios.put(signedRequest, file, options)
-      url = result.config.url;
-      console.log("Response from s3", result)
-      this.setState({success: true, url});
-    } catch (err) {
-      console.error(err)
-    }
-
     EXIF.getData(file, function() {
       const tags =  EXIF.getAllTags(this);
       console.log("tags", tags)
@@ -314,19 +284,19 @@ class Home extends Component {
         
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: latFinal, x: lonFinal, zoom: 18, url }
+          state: { y: latFinal, x: lonFinal, zoom: 18, file }
         })
       } else if (position?.coords) {
-        console.log("what's the url?", url)
+        console.log("what's the url?")
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
+          state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, file }
         })
       } else {
-        console.log("what's the url?", url)
+        console.log("what's the url?")
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: 38.923748, x: -89.938355, zoom: 14, url, message: "Location data not found. Please update your position" }
+          state: { y: 38.923748, x: -89.938355, zoom: 14, message: "Location data not found. Please update your position", file }
         })
       }
     })
