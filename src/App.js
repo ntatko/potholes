@@ -41,7 +41,7 @@ class App extends React.Component {
           <Route path="/mobile-map">
             <MobileMap />
           </Route>
-          <Route path="/map">
+          {/* <Route path="/map">
             <Map fullScreen onMapInit={this.onMapInit} >
               <Sidebar showModal={this.showModal} />
               {this.state.showModal && <UploadModal open={this.state.showModal} handleModalClose={() => this.setState({showModal: false})} />}
@@ -49,7 +49,7 @@ class App extends React.Component {
               <LayerPanel />
               <Popup />
             </Map>
-          </Route>
+          </Route> */}
           <Route path='/mobile-upload'>
             <MobileHome />
           </Route>
