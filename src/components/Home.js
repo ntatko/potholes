@@ -264,8 +264,8 @@ class Home extends Component {
       
   }
 
-  handleChange = async stuff => {
-    console.log("this is the stuff", stuff.target.files[0])
+  handleChange = async event => {
+    console.log("this is the event", event.target.files[0])
     const props = this.props
 
     let position
@@ -278,13 +278,12 @@ class Home extends Component {
 
     console.log(position)
 
-
     let url
 
     // upload to AWS
-    const file = stuff.target.files[0];
+    const file = event.target.files[0];
     // Split the filename to get the name and type
-    const fileParts = stuff.target.files[0].name.split('.');
+    const fileParts = file.name.split('.');
     const fileType = fileParts[1];
     console.log("Preparing the upload");
     try {
