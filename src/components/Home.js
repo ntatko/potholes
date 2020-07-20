@@ -70,7 +70,7 @@ const PillContainer = styled.div`
   width: 135px;
   background: rgb(236, 236, 236);
   border-radius: 50px;
-  height: 30px;
+  height: 37px;
   position: relative;
 
   &:hover {
@@ -112,6 +112,8 @@ const Card = styled.div`
   border-radius: 15px;
   overflow: hidden;
   max-width: 600px;
+  box-shadow: none;
+  background: #f3f3f3;
 `
 
 const Image = styled.img`
@@ -253,9 +255,9 @@ class Home extends Component {
               geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat])),
               
             })
+          })
         })
       })
-    })
 
       map.addLayer(layer)
     }
