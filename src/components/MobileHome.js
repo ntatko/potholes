@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Logo from '../logo.png'
 import EXIF from 'exif-js'
 import { withRouter } from 'react-router-dom'
+import { BounceLoader } from 'react-spinners'
 import axios from 'axios'
 import { v4 as UUID } from 'uuid'
 
@@ -38,53 +39,55 @@ function ConvertDMSToDD(degrees, minutes, seconds, direction) {
 
 class MobileHome extends Component {
 
+  constructor() {
+    super()
+
+    this.state = {
+      loading: false
+    }
+  }
+
   async componentDidMount() {
     await navigator.permissions.query({name:'geolocation'})
   }
   
   handleChange = async stuff => {
     console.log("this is the stuff", stuff.target.files[0])
-    console.log("typeof", typeof stuff.target.files)
     const props = this.props
 
-        // upload to AWS
-        let file = stuff.target.files[0];
-        // Split the filename to get the name and type
-        let fileParts = stuff.target.files[0].name.split('.');
-        let fileType = fileParts[1];
-        console.log("Preparing the upload");
-        axios.post("https://geokit-api.herokuapp.com/getSignedUrl",{
-          fileName : `${new Date().toISOString()}-${UUID()}`,
-          fileType : `${stuff.target.files[0].name.split('.')[1]}`
-        })
-        .then(response => {
-          var returnData = response.data.data.returnData;
-          var signedRequest = returnData.signedRequest;
-          var url = returnData.url;
-          this.setState({url: url})
-          console.log("Recieved a signed request " + signedRequest);
-          
-         // Put the fileType in the headers for the upload
-          var options = {
-            headers: {
-              'Content-Type': 'image/jpeg'
-            }
-          };
-          // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
-          axios.put(signedRequest,file,options)
-          .then(result => {
-            console.log("Response from s3")
-            this.setState({success: true});
-          })
-          .catch(error => {
-            alert("ERROR " + JSON.stringify(error));
-          })
-        })
-        .catch(error => {
-          alert(JSON.stringify(error));
-        })
+    // upload to AWS
+    const file = stuff.target.files[0];
+    // Split the filename to get the name and type
+    const fileParts = stuff.target.files[0].name.split('.');
+    const fileType = fileParts[1];
+    console.log("Preparing the upload");
+    try {
+      this.setState({ loading: true })
+      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
+        fileName: `${new Date().toISOString()}-${UUID()}`,
+        fileType
+      })
+      const returnData = response.data.data.returnData;
+      const signedRequest = returnData.signedRequest;
+      const url = returnData.url;
+      this.setState({ url })
+      console.log("Recieved a signed request", signedRequest, url);
+      
+      // Put the fileType in the headers for the upload
+      var options = {
+        headers: {
+          'Content-Type': 'image/jpeg'
+        }
+      };
+      // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
+      const result = await axios.put(signedRequest, file, options)
+      console.log("Response from s3", result)
+      this.setState({success: true});
+    } catch (err) {
+      console.error(err)
+    }
 
-    EXIF.getData(stuff.target.files[0], function() {
+    EXIF.getData(file, function() {
       const tags =  EXIF.getAllTags(this);
       console.log("tags", tags)
 
@@ -123,19 +126,23 @@ class MobileHome extends Component {
   render () {
     return (
       <div style={container}>
-          <img style={{ width: '125px', borderRadius: '15px' }} src={Logo} alt='logo' />
-        <div style={buttonContainer}>
-          {/* <div style={{ margin: '15px' }}>
-            <button style={button} className='waves-effect waves-light btn'>Take Photo</button>
-          </div> */}
-          <div style={{ margin: '15px' }}>
-            <button style={button} onClick={() => document.getElementById('file-upload').click()} className='waves-effect waves-light btn'>Upload Photo</button>
-            <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
-              this.handleChange(e)
-              this.setState({ open: false })
-            }} />
+        <img style={{ width: '125px', borderRadius: '15px' }} src={Logo} alt='logo' />
+        {this.state.loading ? (
+          <>
+            <BounceLoader size={140} color={'#61ccf5'}/>
+            {'Uploading...'}
+          </>
+        ) : (
+          <div style={buttonContainer}>
+            <div style={{ margin: '15px' }}>
+              <button style={button} onClick={() => document.getElementById('file-upload').click()} className='waves-effect waves-light btn'>Upload Photo</button>
+              <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
+                this.handleChange(e)
+                this.setState({ open: false })
+              }} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     )
   }
