@@ -33,7 +33,7 @@ class App extends React.Component {
           <Route path="/mobile-map">
             <MobileMap />
           </Route>
-          <Route path="/">
+          <Route path={["/:id", "/"]} >
             <Home />
           </Route>
         </Switch>

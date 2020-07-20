@@ -46,7 +46,6 @@ const Header = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-
 `
 
 const Content = styled.div`
@@ -101,8 +100,10 @@ const PillText = styled.p`
 `
 
 const Card = styled(motion.div)`
+  max-width: 300px;
   width: 90%;
   min-height: 200px;
+  margin: 20px;
   border-radius: 15px;
   overflow: hidden;
   max-width: 600px;
@@ -116,9 +117,9 @@ const Card = styled(motion.div)`
 `
 
 const ModalCard = styled(motion.div)`
-  width: ${props => `calc(${props.width}px - 5%)`};
+  width: ${p => p.width}px;
+  height: 100%;
   min-height: 90px;
-  border-radius: 15px;
   overflow: hidden;
   max-width: 600px;
   box-shadow: none;
@@ -129,7 +130,9 @@ const ModalCard = styled(motion.div)`
   z-index: 10;
   box-shadow: 0px 10px 20px #222222a6;
   background: #f3f3f3;
-  top: 50px;
+  top: 0;
+  max-width: 900px;
+  max-height: 900px;
 `
 
 const ModalCloseButton = styled.i`
@@ -244,13 +247,22 @@ class Home extends Component {
   }
 
   async componentDidMount () {
-    
+    const { match } = this.props
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
     this.setState({ width })
-    await this.makeMapChanges()
+    await this.getPotholes().then(() => {
+      console.log("hahdhaah")
+      console.log("potholes", this.state.potholes)
+      console.log("match params", match)
+      const found = this.state.potholes.find(pothole => pothole.id === Number(match.params.id))
+      console.log(found)
+      if (found) {
+        this.setState({ selectedPothole: found })
+      }
+    })
 
-    setInterval(this.makeMapChanges, 60000)
+    setInterval(this.getPotholes, 60000)
   }
 
   sortPotholes = (a, b) => {
@@ -263,7 +275,7 @@ class Home extends Component {
     }
   } 
 
-  makeMapChanges = async () => {
+  getPotholes = async () => {
     const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
     const allPoints = await response.json()
 
@@ -411,7 +423,7 @@ class Home extends Component {
         </Header>
         <Content  activePage={this.state.activePage} width={this.state.width}>
         <AnimateSharedLayout type="crossfade">
-          {this.props.potholes.map(pothole => (
+          {this.state.potholes.map(pothole => (
             <Card layoutId={pothole.id} onClick={() => this.setState({ selectedPothole: pothole })} className="card">
               <motion.div className="card-image">
                 <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
