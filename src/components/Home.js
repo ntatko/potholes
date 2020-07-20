@@ -240,6 +240,7 @@ class Home extends Component {
               geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat])),
               
             })
+          })
         })
       })
 
