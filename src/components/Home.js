@@ -17,6 +17,8 @@ import olStyleFill from 'ol/style/fill'
 import olStyleCircle from 'ol/style/circle'
 import olStyleStroke from 'ol/style/stroke'
 
+import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion'
+
 import colormap from 'colormap'
 import axios from 'axios'
 
@@ -105,16 +107,17 @@ const PillText = styled.p`
   color: #424242;
 `
 
-const Card = styled.div`
-  width: 90%;
-  height: 90px;
-  min-height: 90px;
-  border-radius: 15px;
-  overflow: hidden;
-  max-width: 600px;
-  box-shadow: none;
-  background: #f3f3f3;
-`
+const Card = {
+  width: '90%',
+  height: '90px',
+  minHeight: '90px',
+  borderRadius: '15px',
+  overflow: 'hidden',
+  maxWidth: '600px',
+  boxShadow: 'none',
+  background: '#f3f3f3'
+}
+  
 
 const Image = styled.img`
   width: 15rem !important;
@@ -204,14 +207,14 @@ class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, potholes: [], map: null, width: 400 }
+    this.state = { activePage: 0, potholes: [], map: null, width: 400, pothole: null }
   }
 
   componentDidMount () {
     
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
-    this.setState({ width })    
+    this.setState({ width })
   }
 
   componentWillReceiveProps (nextProps) {
@@ -386,10 +389,35 @@ class Home extends Component {
           </Map>
         </MapContainer>
 
-        <a
-          style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
+        {/* <AnimateSharedLayout type="crossfade">
+          {this.props.potholes.map(pothole => (
+            <motion.div className="card horizontal" style={Card} layoutId={pothole.id} onClick={() => this.setState({ pothole })}>
+              <div className="card-image">
+                <Image src={pothole.image_url} />
+              </div>
+              <CardContent>
+              <CardFooter color='gray'>{pothole.address}</CardFooter>
+                <CardFooter color='lightgray'>Added {timeSince(pothole.createddate)} ago</CardFooter>
+              </CardContent>
+            </motion.div>
+          ))}
+        
+          <AnimatePresence>
+            {this.state.pothole && (
+              <motion.div layoutId={this.state.pothole.id}>
+                <motion.h5>{this.state.pothole.id}</motion.h5>
+                <motion.h2>{this.state.pothole.priority}</motion.h2>
+                <motion.button onClick={() => this.setState({ pothole: null })} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </AnimateSharedLayout> */}
+
+        <a style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
           onClick={() => document.getElementById('file-upload').click()}
-          class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">add</i></a>
+          className="btn-floating btn-large waves-effect waves-light">
+            <i className="material-icons">add</i>
+        </a>
           <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
             this.handleChange(e)
             this.setState({ open: false })
