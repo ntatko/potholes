@@ -210,9 +210,21 @@ class Home extends Component {
     setInterval(this.makeMapChanges, 60000)
   }
 
+  sortPotholes = (a, b) => {
+    if (a.createddate < b.createdDate) {
+      return 1
+    } else if (a.createddate > b.createddate) {
+      return -1
+    } else {
+      return 0
+    }
+  } 
+
   makeMapChanges = async () => {
     const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
     const allPoints = await response.json()
+
+    allPoints.sort(this.sortPotholes)
 
     const newPoints = allPoints.filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
     if (newPoints.length) {
@@ -285,13 +297,11 @@ class Home extends Component {
           state: { y: latFinal, x: lonFinal, zoom: 18, file }
         })
       } else if (position?.coords) {
-        console.log("what's the url?")
         props.history.push({
           pathname: '/mobile-map',
           state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, file }
         })
       } else {
-        console.log("what's the url?")
         props.history.push({
           pathname: '/mobile-map',
           state: { y: 38.923748, x: -89.938355, zoom: 14, message: "Location data not found. Please update your position", file }
@@ -320,8 +330,6 @@ class Home extends Component {
             }),
           })
         })
-
-
         return new olStyleStyle({
           image: new olStyleCircle({
             radius: 5,
@@ -339,9 +347,7 @@ class Home extends Component {
     })
 
     map.addLayer(layer)
-
     this.setState({ map })
-
     window.map = map
   }
 
@@ -375,8 +381,7 @@ class Home extends Component {
           
         </Content>
         <MapContainer activePage={this.state.activePage} width={this.state.width}>
-          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
-          </Map>
+          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} />
         </MapContainer>
 
         <a
