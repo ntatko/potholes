@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import { Map, centerAndZoom } from '@bayer/ol-kit'
 import { withRouter } from 'react-router-dom'
 import olProj from 'ol/proj'
+import axios from 'axios'
+import { v4 as UUID } from 'uuid'
+
 
 const container = {
   display: 'flex',
@@ -38,12 +41,43 @@ class MobileMap extends Component {
     const response = await fetch(`https://open.mapquestapi.com/geocoding/v1/reverse?key=${key}&location=${lat},${long}&includeStreet=true`)
     const address = await response.json()
 
+    const file = this.props.location.state.file
+    console.log(file)
+    // Split the filename to get the name and type
+    const fileParts = file.name.split('.');
+    const fileType = fileParts[1];
+    let s3PhotoUrl
+    console.log("Preparing the upload");
+    try {
+      this.setState({ loading: true })
+      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
+        fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
+      })
+      const returnData = response.data.data.returnData;
+      const signedRequest = returnData.signedRequest;
+
+      console.log("Recieved a signed request", signedRequest)
+      // Put the fileType in the headers for the upload
+      var options = {
+        headers: {
+          'Content-Type': 'image/jpeg'
+        }
+      };
+      // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
+      const result = await axios.put(signedRequest, file, options)
+      s3PhotoUrl = result.config.url.split('?')[0]
+      console.log("Response from s3", result)
+      this.setState({success: true});
+    } catch (err) {
+      console.error(err)
+    }
+
     const potholeData = {
       long,
       lat,
       priority: 'low',
       address: address.results[0].locations[0].street,
-      imageUrl: this.props.location.state.url
+      imageUrl: s3PhotoUrl
     }
 
     const url = window.serviceBindings.GEOKIT_API_URL + '/report/'
