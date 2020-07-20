@@ -8,10 +8,16 @@ import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
 import olGeomPoint from 'ol/geom/point'
 import olProj from 'ol/proj'
+import olStyleStyle from 'ol/style/style'
+import olStyleFill from 'ol/style/fill'
+import olStyleCircle from 'ol/style/circle'
+import olStyleStroke from 'ol/style/stroke'
+
+import colormap from 'colormap'
 
 import styled from 'styled-components'
 import '../App.css';
-import { Map, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
+import { Map, VectorLayer, centerAndZoom, Popup } from '@bayer/ol-kit'
 
 const container = {
   height: '100%'
@@ -164,6 +170,12 @@ function timeSince(dateTime) {
   return Math.floor(seconds) + " seconds";
 }
 
+const priorityStyle = {
+  high: 'red',
+  medium: 'orange',
+  low: 'yellow'
+}
+
 class Home extends Component {
   constructor (props) {
     super(props)
@@ -181,9 +193,42 @@ class Home extends Component {
   componentWillReceiveProps (nextProps) {
     const { map } = this.state
 
+    const orderedPotholes = this.props.potholes.sort((a, b) => new Date(a.createddate) - new Date(b.createddate))
+
+    const ramp = colormap({
+      nshades: this.props.potholes.length,
+      colormap: 'freesurface-blue'
+    })
+
     if (this.props.potholes.length) {
       const layer = new VectorLayer({
         title: 'Potholes',
+        style: feature => {
+          if (!feature) return new olStyleStyle({
+            image: new olStyleCircle({
+              radius: 5,
+              fill: new olStyleFill({
+                color: '#000'
+              }),
+            })
+          })
+
+          const idx = orderedPotholes.findIndex(p => feature.get('id') === p.id)
+
+          console.log(idx, ramp[idx])
+          return new olStyleStyle({
+            image: new olStyleCircle({
+              radius: 5,
+              fill: new olStyleFill({
+                color: priorityStyle[feature.get('priority')]
+              }),
+              stroke: new olStyleStroke({
+                color: 'black',
+                width: 2
+              })
+            })
+          })
+        },
         source: new olSourceVector({
           features: this.props.potholes.map(pothole => {
             return new olFeature({
@@ -192,14 +237,10 @@ class Home extends Component {
               name: 'pothole',
               id: pothole.id,
               ...pothole,
-              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
+              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat])),
+              
             })
-        }).concat(new olFeature({
-            feature_type: ['pothole'],
-            title: 'Potholes',
-            name: 'Pothole',
-            geometry: new olGeomPoint(olProj.fromLonLat([-89.940598, 38.923107]))
-          })).filter(feature => !feature.getGeometry().getCoordinates().includes(NaN))
+        })
       })
     })
 
@@ -236,33 +277,7 @@ class Home extends Component {
           </PillContainer>
         </Header>
         <Content  activePage={this.state.activePage} width={this.state.width}>
-          <Card className="card horizontal">
-            <div className="card-image">
-              <Image src={potholeone} />
-            </div>
-            <CardContent>
-              <CardTitle>Pothole</CardTitle>
-              <CardFooter color='red'>Added 20 days ago</CardFooter>
-            </CardContent>
-          </Card>
-          <Card className="card horizontal">
-            <div className="card-image">
-              <Image src={pothole2} />
-            </div>
-            <CardContent>
-              <CardTitle>Pothole</CardTitle>
-              <CardFooter color='orange'>Added 12 days ago</CardFooter>
-            </CardContent>
-          </Card>
-          <Card className="card horizontal">
-            <div className="card-image">
-              <Image src={pothole3} />
-            </div>
-            <CardContent>
-              <CardTitle>Pothole</CardTitle>
-              <CardFooter color='lightgray'>Added 8 days ago</CardFooter>
-            </CardContent>
-          </Card>
+          
           { this.props.potholes.map((pothole) => (
             <Card className="card horizontal" key={pothole.id}>
               <div className="card-image">
