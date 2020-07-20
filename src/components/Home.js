@@ -269,7 +269,7 @@ class Home extends Component {
     const props = this.props
 
     let position
-    await navigator.geolocation.getCurrentPosition((p) => {
+    navigator.geolocation.getCurrentPosition((p) => {
       position = p
     }, (failure) => {
       console.log(failure)
