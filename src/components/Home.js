@@ -268,6 +268,8 @@ class Home extends Component {
     console.log("this is the stuff", stuff.target.files[0])
     const props = this.props
 
+    let url
+
     // upload to AWS
     const file = stuff.target.files[0];
     // Split the filename to get the name and type
@@ -282,7 +284,7 @@ class Home extends Component {
       })
       const returnData = response.data.data.returnData;
       const signedRequest = returnData.signedRequest;
-      const url = returnData.url;
+      url = returnData.url;
       this.setState({ url })
       console.log("Recieved a signed request", signedRequest, url);
       
@@ -322,14 +324,14 @@ class Home extends Component {
         
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: latFinal, x: lonFinal, zoom: 18 }
+          state: { y: latFinal, x: lonFinal, zoom: 18, url }
         })
       } else {
 
         navigator.geolocation.getCurrentPosition((position) => {
           props.history.push({
             pathname: '/mobile-map',
-            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18 }
+            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
           })
         })
       }
