@@ -129,8 +129,7 @@ class MobileHome extends Component {
         <img style={{ width: '125px', borderRadius: '15px' }} src={Logo} alt='logo' />
         {this.state.loading ? (
           <>
-            <BounceLoader size={140} color={'#61ccf5'}/>
-            {'Uploading...'}
+            <BounceLoader size={80} color={'#61ccf5'}/>
           </>
         ) : (
           <div style={buttonContainer}>
