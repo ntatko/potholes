@@ -284,9 +284,6 @@ class Home extends Component {
       })
       const returnData = response.data.data.returnData;
       const signedRequest = returnData.signedRequest;
-      url = returnData.url;
-      this.setState({ url })
-      console.log("Recieved a signed request", signedRequest, url);
       
       // Put the fileType in the headers for the upload
       var options = {
@@ -294,10 +291,10 @@ class Home extends Component {
           'Content-Type': 'image/jpeg'
         }
       };
-      // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
       const result = await axios.put(signedRequest, file, options)
+      url = result.config.url;
       console.log("Response from s3", result)
-      this.setState({success: true});
+      this.setState({success: true, url});
     } catch (err) {
       console.error(err)
     }
