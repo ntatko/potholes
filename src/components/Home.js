@@ -334,7 +334,10 @@ class Home extends Component {
             pathname: '/mobile-map',
             state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
           })
-        })
+        }, (failure) => {
+          console.log(failure)
+          this.setState({ loading: false, error: failure })
+        }, {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true})
       }
     })
   }
