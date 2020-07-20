@@ -265,11 +265,12 @@ class Home extends Component {
   }
 
   handleChange = async event => {
-    console.log("this is the event", event.target.files[0])
+    const file = event.target.files[0];
+    console.log("this is the event", file)
     const props = this.props
 
     let position
-    navigator.geolocation.getCurrentPosition((p) => {
+    await navigator.geolocation.getCurrentPosition((p) => {
       position = p
     }, (failure) => {
       console.log(failure)
@@ -281,7 +282,6 @@ class Home extends Component {
     let url
 
     // upload to AWS
-    const file = event.target.files[0];
     // Split the filename to get the name and type
     const fileParts = file.name.split('.');
     const fileType = fileParts[1];
@@ -333,16 +333,17 @@ class Home extends Component {
           pathname: '/mobile-map',
           state: { y: latFinal, x: lonFinal, zoom: 18, url }
         })
-      } else if (position.coords) {
-        console.log("getting device location...")
+      } else if (position?.coords) {
+        console.log("what's the url?", url)
         props.history.push({
           pathname: '/mobile-map',
           state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
         })
       } else {
+        console.log("what's the url?", url)
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: 38.923748, x: -89.938355, zoom: 18, url, message: "Location data not found. Please update your position" }
+          state: { y: 38.923748, x: -89.938355, zoom: 14, url, message: "Location data not found. Please update your position" }
         })
       }
     })
