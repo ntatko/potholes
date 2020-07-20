@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Logo from '../logo.png'
 import EXIF from 'exif-js'
 import { withRouter } from 'react-router-dom'
+import { BounceLoader } from 'react-spinners'
 import axios from 'axios'
 import { v4 as UUID } from 'uuid'
 
@@ -38,15 +39,21 @@ function ConvertDMSToDD(degrees, minutes, seconds, direction) {
 
 class MobileHome extends Component {
 
+  constructor() {
+    super()
+
+    this.state = {
+      loading: false
+    }
+  }
+
   async componentDidMount() {
     await navigator.permissions.query({name:'geolocation'})
   }
   
   handleChange = async stuff => {
     console.log("this is the stuff", stuff.target.files[0])
-    console.log("typeof", typeof stuff.target.files)
     const props = this.props
-
         // upload to AWS
         const file = stuff.target.files[0];
         // Split the filename to get the name and type
@@ -120,19 +127,22 @@ class MobileHome extends Component {
   render () {
     return (
       <div style={container}>
-          <img style={{ width: '125px', borderRadius: '15px' }} src={Logo} alt='logo' />
-        <div style={buttonContainer}>
-          {/* <div style={{ margin: '15px' }}>
-            <button style={button} className='waves-effect waves-light btn'>Take Photo</button>
-          </div> */}
-          <div style={{ margin: '15px' }}>
-            <button style={button} onClick={() => document.getElementById('file-upload').click()} className='waves-effect waves-light btn'>Upload Photo</button>
-            <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
-              this.handleChange(e)
-              this.setState({ open: false })
-            }} />
+        <img style={{ width: '125px', borderRadius: '15px' }} src={Logo} alt='logo' />
+        {this.state.loading ? (
+          <>
+            <BounceLoader size={80} color={'#61ccf5'}/>
+          </>
+        ) : (
+          <div style={buttonContainer}>
+            <div style={{ margin: '15px' }}>
+              <button style={button} onClick={() => document.getElementById('file-upload').click()} className='waves-effect waves-light btn'>Upload Photo</button>
+              <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
+                this.handleChange(e)
+                this.setState({ open: false })
+              }} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     )
   }

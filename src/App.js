@@ -24,14 +24,17 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
-    await navigator.permissions.query({name:'geolocation'})
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
+    await navigator?.permissions?.query({name:'geolocation'})
+    
+    setTimeout(async () => {
+      await fetch(url).then(r => r.json()).then(data => {
+        this.setState({ potholes: data })
+  
+        this.forceUpdate()
+      })
+    }, 500)
 
-    await fetch(url).then(r => r.json()).then(data => {
-      this.setState({ potholes: data })
-
-      this.forceUpdate()
-    })
   }
 
   render () {
