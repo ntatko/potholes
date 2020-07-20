@@ -327,8 +327,9 @@ class Home extends Component {
           state: { y: latFinal, x: lonFinal, zoom: 18, url }
         })
       } else {
-
+        console.log("getting device location...")
         navigator.geolocation.getCurrentPosition((position) => {
+          console.log("uploaded, got location, and going to a new page")
           props.history.push({
             pathname: '/mobile-map',
             state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
