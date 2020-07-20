@@ -268,6 +268,15 @@ class Home extends Component {
     console.log("this is the stuff", stuff.target.files[0])
     const props = this.props
 
+    let position
+    navigator.geolocation.getCurrentPosition((p) => {
+      position = p
+    }, (failure) => {
+      console.log(failure)
+      // this.setState({ loading: false, error: failure })
+    }, {enableHighAccuracy: true})
+
+
     let url
 
     // upload to AWS
@@ -323,18 +332,17 @@ class Home extends Component {
           pathname: '/mobile-map',
           state: { y: latFinal, x: lonFinal, zoom: 18, url }
         })
-      } else {
+      } else if (position.coords) {
         console.log("getting device location...")
-        navigator.geolocation.getCurrentPosition((position) => {
-          console.log("uploaded, got location, and going to a new page")
-          props.history.push({
-            pathname: '/mobile-map',
-            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
-          })
-        }, (failure) => {
-          console.log(failure)
-          // this.setState({ loading: false, error: failure })
-        }, {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true})
+        props.history.push({
+          pathname: '/mobile-map',
+          state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
+        })
+      } else {
+        props.history.push({
+          pathname: '/mobile-map',
+          state: { y: 38.923748, x: -89.938355, zoom: 18, url, message: "Location data not found. Please update your position" }
+        })
       }
     })
   }
