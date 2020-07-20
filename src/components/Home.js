@@ -336,7 +336,7 @@ class Home extends Component {
           })
         }, (failure) => {
           console.log(failure)
-          this.setState({ loading: false, error: failure })
+          // this.setState({ loading: false, error: failure })
         }, {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true})
       }
     })
