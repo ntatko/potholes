@@ -66,13 +66,11 @@ class MobileHome extends Component {
     try {
       this.setState({ loading: true })
       const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
-        fileName: `${new Date().toISOString()}-${UUID()}`,
-        fileType
+        fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
       })
       const returnData = response.data.data.returnData;
       const signedRequest = returnData.signedRequest;
-      url = returnData.url;
-      this.setState({ url })
+
       console.log("Recieved a signed request", signedRequest, url);
       
       // Put the fileType in the headers for the upload
@@ -83,8 +81,9 @@ class MobileHome extends Component {
       };
       // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
       const result = await axios.put(signedRequest, file, options)
+      url = result.config.url.split('?')[0]
       console.log("Response from s3", result)
-      this.setState({success: true});
+      this.setState({success: true, url});
     } catch (err) {
       console.error(err)
     }

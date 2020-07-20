@@ -267,29 +267,35 @@ class Home extends Component {
       
   }
 
-  handleChange = async stuff => {
-    console.log("this is the stuff", stuff.target.files[0])
+  handleChange = async event => {
+    const file = event.target.files[0];
+    console.log("this is the event", file)
     const props = this.props
+
+    let position
+    await navigator.geolocation.getCurrentPosition((p) => {
+      position = p
+    }, (failure) => {
+      console.log(failure)
+      // this.setState({ loading: false, error: failure })
+    }, {enableHighAccuracy: true})
+
+    console.log(position)
 
     let url
 
     // upload to AWS
-    const file = stuff.target.files[0];
     // Split the filename to get the name and type
-    const fileParts = stuff.target.files[0].name.split('.');
+    const fileParts = file.name.split('.');
     const fileType = fileParts[1];
     console.log("Preparing the upload");
     try {
       this.setState({ loading: true })
       const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
-        fileName: `${new Date().toISOString()}-${UUID()}`,
-        fileType
+        fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
       })
       const returnData = response.data.data.returnData;
       const signedRequest = returnData.signedRequest;
-      url = returnData.url;
-      this.setState({ url })
-      console.log("Recieved a signed request", signedRequest, url);
       
       // Put the fileType in the headers for the upload
       var options = {
@@ -297,10 +303,10 @@ class Home extends Component {
           'Content-Type': 'image/jpeg'
         }
       };
-      // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
       const result = await axios.put(signedRequest, file, options)
+      url = result.config.url.split('?')[0]
       console.log("Response from s3", result)
-      this.setState({success: true});
+      this.setState({success: true, url});
     } catch (err) {
       console.error(err)
     }
@@ -329,13 +335,17 @@ class Home extends Component {
           pathname: '/mobile-map',
           state: { y: latFinal, x: lonFinal, zoom: 18, url }
         })
+      } else if (position?.coords) {
+        console.log("what's the url?", url)
+        props.history.push({
+          pathname: '/mobile-map',
+          state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
+        })
       } else {
-
-        navigator.geolocation.getCurrentPosition((position) => {
-          props.history.push({
-            pathname: '/mobile-map',
-            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
-          })
+        console.log("what's the url?", url)
+        props.history.push({
+          pathname: '/mobile-map',
+          state: { y: 38.923748, x: -89.938355, zoom: 14, url, message: "Location data not found. Please update your position" }
         })
       }
     })
