@@ -1,10 +1,6 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 
-import potholeone from '../potholeone.png'
-import pothole2 from '../pothole2.png'
-import pothole3 from '../pothole3.png'
-
 import EXIF from 'exif-js'
 import { v4 as UUID } from 'uuid'
 
@@ -17,7 +13,6 @@ import olStyleFill from 'ol/style/fill'
 import olStyleCircle from 'ol/style/circle'
 import olStyleStroke from 'ol/style/stroke'
 
-import colormap from 'colormap'
 import axios from 'axios'
 
 import styled from 'styled-components'
@@ -207,61 +202,49 @@ class Home extends Component {
     this.state = { activePage: 0, potholes: [], map: null, width: 400 }
   }
 
-  componentDidMount () {
+  async componentDidMount () {
     
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
-    this.setState({ width })    
+    this.setState({ width })
+    await this.makeMapChanges()
+
+    setInterval(this.makeMapChanges, 60000)
   }
 
-  componentWillReceiveProps (nextProps) {
-    const { map } = this.state
+  makeMapChanges = async () => {
+    const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
+    const allPoints = await response.json()
 
-    if (this.props.potholes.length) {
-      const layer = new VectorLayer({
-        title: 'Potholes',
-        style: feature => {
-          if (!feature) return new olStyleStyle({
-            image: new olStyleCircle({
-              radius: 5,
-              fill: new olStyleFill({
-                color: '#000'
-              }),
-            })
-          })
+    const newPoints = allPoints.filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
+    if (newPoints.length) {
+      const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
 
-
-          return new olStyleStyle({
-            image: new olStyleCircle({
-              radius: 5,
-              fill: new olStyleFill({
-                color: priorityStyle[feature.get('priority')]
-              }),
-              stroke: new olStyleStroke({
-                color: 'black',
-                width: 2
-              })
-            })
-          })
-        },
-        source: new olSourceVector({
-          features: this.props.potholes.map(pothole => {
-            return new olFeature({
-              feature_type: ['pothole'],
-              title: 'pothole',
-              name: 'pothole',
-              id: pothole.id,
-              ...pothole,
-              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat])),
-              
-            })
-          })
+      newPoints.map(point => {
+        return new olFeature({
+          feature_type: ['pothole'],
+          title: 'pothole',
+          name: 'pothole',
+          id: point.id,
+          ...point,
+          geometry: new olGeomPoint(olProj.fromLonLat([point.location_lon, point.location_lat]))
         })
+      }).forEach(point => {
+        layer.getSource().addFeature(point)
+      })
+      this.setState({ potholes: allPoints })
+    }
+
+    const deadPoints = this.state.potholes.filter(point => !allPoints.map(hole => hole.id).includes(point.id))
+    if (deadPoints.length) {
+      const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
+
+      deadPoints.forEach(point => {
+        layer.getSource().removeFeature(layer.getSource().getFeatureById(point.id))
       })
 
-      map.addLayer(layer)
+      this.setState({ potholes: allPoints })
     }
-      
   }
 
   handleChange = async event => {
@@ -358,6 +341,37 @@ class Home extends Component {
     }
     centerAndZoom(map, opts)
 
+    const layer = new VectorLayer({
+      title: 'Potholes',
+      style: feature => {
+        if (!feature) return new olStyleStyle({
+          image: new olStyleCircle({
+            radius: 5,
+            fill: new olStyleFill({
+              color: '#000'
+            }),
+          })
+        })
+
+
+        return new olStyleStyle({
+          image: new olStyleCircle({
+            radius: 5,
+            fill: new olStyleFill({
+              color: priorityStyle[feature.get('priority')]
+            }),
+            stroke: new olStyleStroke({
+              color: 'black',
+              width: 2
+            })
+          })
+        })
+      },
+      source: new olSourceVector()
+    })
+
+    map.addLayer(layer)
+
     this.setState({ map })
 
     window.map = map
@@ -378,7 +392,7 @@ class Home extends Component {
         </Header>
         <Content  activePage={this.state.activePage} width={this.state.width}>
           
-          { this.props.potholes.map((pothole) => (
+          { this.state.potholes.map((pothole) => (
             <Card className="card horizontal" key={pothole.id}>
               <div className="card-image">
                 <Image src={pothole.image_url} />
