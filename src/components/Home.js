@@ -200,8 +200,8 @@ class Home extends Component {
             name: 'Pothole',
             geometry: new olGeomPoint(olProj.fromLonLat([-89.940598, 38.923107]))
           })).filter(feature => !feature.getGeometry().getCoordinates().includes(NaN))
+        })
       })
-    })
 
       map.addLayer(layer)
     }

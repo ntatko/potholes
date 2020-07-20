@@ -43,7 +43,7 @@ class MobileMap extends Component {
       lat,
       priority: 'low',
       address: address.results[0].locations[0].street,
-      imageUrl: "https://picsum.photos/500" // Just gotta make this a real photo :P
+      imageUrl: this.props.location.state.url
     }
 
     const url = window.serviceBindings.GEOKIT_API_URL + '/report/'
