@@ -3,8 +3,6 @@ import Logo from '../logo.png'
 import EXIF from 'exif-js'
 import { withRouter } from 'react-router-dom'
 import { BounceLoader } from 'react-spinners'
-import axios from 'axios'
-import { v4 as UUID } from 'uuid'
 
 const container = {
   height: '100%',
@@ -54,40 +52,7 @@ class MobileHome extends Component {
   handleChange = async stuff => {
     console.log("this is the stuff", stuff.target.files[0])
     const props = this.props
-
-    let url
-
-    // upload to AWS
     const file = stuff.target.files[0];
-    // Split the filename to get the name and type
-    const fileParts = stuff.target.files[0].name.split('.');
-    const fileType = fileParts[1];
-    console.log("Preparing the upload");
-    try {
-      this.setState({ loading: true })
-      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
-        fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
-      })
-      const returnData = response.data.data.returnData;
-      const signedRequest = returnData.signedRequest;
-
-      console.log("Recieved a signed request", signedRequest, url);
-      
-      // Put the fileType in the headers for the upload
-      var options = {
-        headers: {
-          'Content-Type': 'image/jpeg'
-        }
-      };
-      // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
-      const result = await axios.put(signedRequest, file, options)
-      url = result.config.url.split('?')[0]
-      console.log("Response from s3", result)
-      this.setState({success: true, url});
-    } catch (err) {
-      console.error(err)
-    }
-
     EXIF.getData(file, function() {
       const tags =  EXIF.getAllTags(this);
       console.log("tags", tags)
@@ -110,14 +75,15 @@ class MobileHome extends Component {
         
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: latFinal, x: lonFinal, zoom: 18, url }
+          state: { y: latFinal, x: lonFinal, zoom: 18 },
+          file: stuff.target.files[0] //passing picture
         })
       } else {
 
         navigator.geolocation.getCurrentPosition((position) => {
           props.history.push({
             pathname: '/mobile-map',
-            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
+            state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, file: stuff.target.files[0] }
           })
         })
       }

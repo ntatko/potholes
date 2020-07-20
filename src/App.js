@@ -5,7 +5,6 @@ import {
   Route
 } from "react-router-dom";
 
-import MobileHome from './components/MobileHome';
 import MobileMap from './components/MobileMap'
 import Home from './components/Home'
 
@@ -15,7 +14,6 @@ class App extends React.Component {
 
     this.state = {
       showModal: false,
-      potholes: []
     }
 
     window.serviceBindings = {
@@ -26,15 +24,6 @@ class App extends React.Component {
   async componentDidMount() {
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
     await navigator?.permissions?.query({name:'geolocation'})
-    
-    setTimeout(async () => {
-      await fetch(url).then(r => r.json()).then(data => {
-        this.setState({ potholes: data })
-  
-        this.forceUpdate()
-      })
-    }, 500)
-
   }
 
   render () {
@@ -44,20 +33,8 @@ class App extends React.Component {
           <Route path="/mobile-map">
             <MobileMap />
           </Route>
-          {/* <Route path="/map">
-            <Map fullScreen onMapInit={this.onMapInit} >
-              <Sidebar showModal={this.showModal} />
-              {this.state.showModal && <UploadModal open={this.state.showModal} handleModalClose={() => this.setState({showModal: false})} />}
-              <Controls />
-              <LayerPanel />
-              <Popup />
-            </Map>
-          </Route> */}
-          <Route path='/mobile-upload'>
-            <MobileHome />
-          </Route>
           <Route path="/">
-            <Home potholes={this.state.potholes} />
+            <Home />
           </Route>
         </Switch>
       </Router>

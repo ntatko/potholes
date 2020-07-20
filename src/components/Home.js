@@ -1,10 +1,6 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 
-import potholeone from '../potholeone.png'
-import pothole2 from '../pothole2.png'
-import pothole3 from '../pothole3.png'
-
 import EXIF from 'exif-js'
 import { v4 as UUID } from 'uuid'
 
@@ -18,9 +14,6 @@ import olStyleCircle from 'ol/style/circle'
 import olStyleStroke from 'ol/style/stroke'
 
 import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion'
-
-import colormap from 'colormap'
-import axios from 'axios'
 
 import styled from 'styled-components'
 import '../App.css';
@@ -250,60 +243,61 @@ class Home extends Component {
     this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null }
   }
 
-  componentDidMount () {
+  async componentDidMount () {
+    
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
     this.setState({ width })
+    await this.makeMapChanges()
+
+    setInterval(this.makeMapChanges, 60000)
   }
 
-  componentWillReceiveProps (nextProps) {
-    const { map } = this.state
+  sortPotholes = (a, b) => {
+    if (a.createddate < b.createdDate) {
+      return 1
+    } else if (a.createddate > b.createddate) {
+      return -1
+    } else {
+      return 0
+    }
+  } 
 
-    if (this.props.potholes.length) {
-      const layer = new VectorLayer({
-        title: 'Potholes',
-        style: feature => {
-          if (!feature) return new olStyleStyle({
-            image: new olStyleCircle({
-              radius: 5,
-              fill: new olStyleFill({
-                color: '#000'
-              }),
-            })
-          })
+  makeMapChanges = async () => {
+    const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
+    const allPoints = await response.json()
 
+    allPoints.sort(this.sortPotholes)
 
-          return new olStyleStyle({
-            image: new olStyleCircle({
-              radius: 5,
-              fill: new olStyleFill({
-                color: priorityStyle[feature.get('priority')]
-              }),
-              stroke: new olStyleStroke({
-                color: 'black',
-                width: 2
-              })
-            })
-          })
-        },
-        source: new olSourceVector({
-          features: this.props.potholes.map(pothole => {
-            return new olFeature({
-              feature_type: ['pothole'],
-              title: 'pothole',
-              name: 'pothole',
-              id: pothole.id,
-              ...pothole,
-              geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat])),
-              
-            })
-          })
+    const newPoints = allPoints.filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
+    if (newPoints.length) {
+      const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
+
+      newPoints.map(point => {
+        return new olFeature({
+          feature_type: ['pothole'],
+          title: 'pothole',
+          name: 'pothole',
+          id: point.id,
+          ...point,
+          geometry: new olGeomPoint(olProj.fromLonLat([point.location_lon, point.location_lat]))
         })
+      }).forEach(point => {
+        layer.getSource().addFeature(point)
+      })
+      this.setState({ potholes: allPoints })
+    }
+
+    const deadPoints = this.state.potholes.filter(point => !allPoints.map(hole => hole.id).includes(point.id))
+    if (deadPoints.length) {
+      const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
+
+      deadPoints.forEach(point => {
+        layer.getSource().removeFeature(layer.getSource().getFeatureById(point.id))
       })
 
-      map.addLayer(layer)
+      this.setState({ potholes: allPoints })
     }
-      
   }
 
   handleChange = async event => {
@@ -320,35 +314,6 @@ class Home extends Component {
     }, {enableHighAccuracy: true})
 
     console.log(position)
-
-    let url
-
-    // upload to AWS
-    // Split the filename to get the name and type
-    const fileParts = file.name.split('.');
-    const fileType = fileParts[1];
-    console.log("Preparing the upload");
-    try {
-      this.setState({ loading: true })
-      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
-        fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
-      })
-      const returnData = response.data.data.returnData;
-      const signedRequest = returnData.signedRequest;
-      
-      // Put the fileType in the headers for the upload
-      var options = {
-        headers: {
-          'Content-Type': 'image/jpeg'
-        }
-      };
-      const result = await axios.put(signedRequest, file, options)
-      url = result.config.url.split('?')[0]
-      console.log("Response from s3", result)
-      this.setState({success: true, url});
-    } catch (err) {
-      console.error(err)
-    }
 
     EXIF.getData(file, function() {
       const tags =  EXIF.getAllTags(this);
@@ -372,19 +337,17 @@ class Home extends Component {
         
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: latFinal, x: lonFinal, zoom: 18, url }
+          state: { y: latFinal, x: lonFinal, zoom: 18, file }
         })
       } else if (position?.coords) {
-        console.log("what's the url?", url)
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, url }
+          state: { y: position.coords.latitude, x: position.coords.longitude, zoom: 18, file }
         })
       } else {
-        console.log("what's the url?", url)
         props.history.push({
           pathname: '/mobile-map',
-          state: { y: 38.923748, x: -89.938355, zoom: 14, url, message: "Location data not found. Please update your position" }
+          state: { y: 38.923748, x: -89.938355, zoom: 14, message: "Location data not found. Please update your position", file }
         })
       }
     })
@@ -399,8 +362,35 @@ class Home extends Component {
     }
     centerAndZoom(map, opts)
 
-    this.setState({ map })
+    const layer = new VectorLayer({
+      title: 'Potholes',
+      style: feature => {
+        if (!feature) return new olStyleStyle({
+          image: new olStyleCircle({
+            radius: 5,
+            fill: new olStyleFill({
+              color: '#000'
+            }),
+          })
+        })
+        return new olStyleStyle({
+          image: new olStyleCircle({
+            radius: 5,
+            fill: new olStyleFill({
+              color: priorityStyle[feature.get('priority')]
+            }),
+            stroke: new olStyleStroke({
+              color: 'black',
+              width: 2
+            })
+          })
+        })
+      },
+      source: new olSourceVector()
+    })
 
+    map.addLayer(layer)
+    this.setState({ map })
     window.map = map
   }
 
@@ -455,8 +445,7 @@ class Home extends Component {
         </AnimateSharedLayout>
         </Content>
         <MapContainer activePage={this.state.activePage} width={this.state.width}>
-          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
-          </Map>
+          <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} />
         </MapContainer>
 
         
