@@ -81,7 +81,7 @@ class MobileHome extends Component {
       };
       // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
       const result = await axios.put(signedRequest, file, options)
-      url = result.config.url;
+      url = result.config.url.split('?')[0]
       console.log("Response from s3", result)
       this.setState({success: true, url});
     } catch (err) {

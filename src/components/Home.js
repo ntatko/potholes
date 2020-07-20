@@ -289,8 +289,7 @@ class Home extends Component {
     try {
       this.setState({ loading: true })
       const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
-        fileName: `${new Date().toISOString()}-${UUID()}`,
-        fileType
+        fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
       })
       const returnData = response.data.data.returnData;
       const signedRequest = returnData.signedRequest;
@@ -302,7 +301,7 @@ class Home extends Component {
         }
       };
       const result = await axios.put(signedRequest, file, options)
-      url = result.config.url;
+      url = result.config.url.split('?')[0]
       console.log("Response from s3", result)
       this.setState({success: true, url});
     } catch (err) {
