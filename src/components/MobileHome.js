@@ -48,43 +48,40 @@ class MobileHome extends Component {
     const props = this.props
 
         // upload to AWS
-        let file = stuff.target.files[0];
+        const file = stuff.target.files[0];
         // Split the filename to get the name and type
-        let fileParts = stuff.target.files[0].name.split('.');
-        let fileType = fileParts[1];
+        const fileParts = stuff.target.files[0].name.split('.');
+        const fileType = fileParts[1];
         console.log("Preparing the upload");
-        axios.post("https://geokit-api.herokuapp.com/getSignedUrl",{
-          fileName : `${new Date().toISOString()}-${UUID()}`,
+        axios.post(`${process.env.API_BASE_URL}`,{
+          fileName : `${new Date().toISOString()}-${UUID()}.${fileType}`,
           fileType : `${stuff.target.files[0].name.split('.')[1]}`
         })
         .then(response => {
-          var returnData = response.data.data.returnData;
-          var signedRequest = returnData.signedRequest;
-          var url = returnData.url;
+          const returnData = response.data.data.returnData
+          const signedRequest = returnData.signedRequest
+          const url = returnData.url;
           this.setState({url: url})
-          console.log("Recieved a signed request " + signedRequest);
-          
-         // Put the fileType in the headers for the upload
-          var options = {
-            headers: {
-              'Content-Type': 'image/jpeg'
-            }
-          };
-          // fetch(signedRequest, { method: 'PUT', mode: 'no-cors', body: JSON.stringify(file)})
-          axios.put(signedRequest,file,options)
+          console.log("Recieved a signed request " + signedRequest)
+          // content type in the headers for the upload
+          const options = { headers: { 'Content-Type': 'image/jpeg' } }
+          //upload to signed URL
+          axios.put(signedRequest, file, options)
           .then(result => {
             console.log("Response from s3")
             this.setState({success: true});
           })
           .catch(error => {
-            alert("ERROR " + JSON.stringify(error));
+            console.log(JSON.stringify(error))
+            alert('Something went wrong with the picture upload.')
           })
         })
         .catch(error => {
-          alert(JSON.stringify(error));
+          console.log(JSON.stringify(error))
+          alert('Something went wrong with the picture upload.')
         })
 
-    EXIF.getData(stuff.target.files[0], function() {
+    EXIF.getData(stuff.target.files[0],() => {
       const tags =  EXIF.getAllTags(this);
       console.log("tags", tags)
 
