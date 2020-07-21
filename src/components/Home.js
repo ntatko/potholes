@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 
 import EXIF from 'exif-js'
-import { v4 as UUID } from 'uuid'
 
 import olSourceVector from 'ol/source/vector'
 import olFeature from 'ol/feature'
@@ -258,7 +257,7 @@ class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null }
+    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false  }
   }
 
   async componentDidMount () {
@@ -536,7 +535,19 @@ class Home extends Component {
         <Content  activePage={this.state.activePage} width={this.state.width}>
         <AnimateSharedLayout type="crossfade">
           {this.state.potholes.map(pothole => (
-            <Card layoutId={pothole.id} onClick={() => this.setState({ selectedPothole: pothole })} className="card">
+            <Card
+              layoutId={pothole.id}
+              onTap={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
+              onPanStart={() => this.setState({ dragging: true })}
+              onDrag={(event, info) => console.log("drag finished", event, info)}
+              onDragEnd={(event, info) => {setTimeout(() => this.setState({ dragging: false }), 1)}}
+              className="card"
+              drag="x"
+              dragConstraints={{ left: -200, right: 200 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
               <motion.div className="card-image">
                 <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
               </motion.div>
