@@ -472,12 +472,14 @@ class Home extends Component {
   setPriority = async string => {
     const { selectedPothole } = this.state
 
-    console.log("trying to set priority...")
-
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/${selectedPothole.id}`
+
     try {
       await fetch(url, {
         method: 'PATCH',
+        headers: {
+          'content-type': 'application/json'
+        },
         body: JSON.stringify({
           priority: string
         })
@@ -485,8 +487,13 @@ class Home extends Component {
 
       const response = await fetch(url)
       const updatedFeature = await response.json()
-      console.log("updated Feature", updatedFeature)
       this.setState({selectedPothole: updatedFeature})
+
+      const nextResponse = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
+      const newPotholes = await nextResponse.json()
+
+      newPotholes.sort(this.sortPotholes)
+      this.setState({potholes: newPotholes})
 
     } catch (err) {
       console.error(err)
