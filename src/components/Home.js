@@ -543,7 +543,7 @@ class Home extends Component {
                         <a key={level} style={ selectedPothole.priority === level ? { background: priorityStyle[level] } : {background: 'transparent'}}
                           onClick={() => this.setPriority(level)}
                           className="btn-floating btn-large waves-effect waves-light">
-                            <i color={selectedPothole.priority === level ? 'white' : priorityStyle[level]} className="material-icons">warning</i>
+                            <i style={selectedPothole.priority === level ? {color: 'white'} : {color: priorityStyle[level]}} className="material-icons">warning</i>
                         </a>
                       )}
                     </ModalImageButtons>
