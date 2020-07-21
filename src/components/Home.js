@@ -13,6 +13,8 @@ import olStyleFill from 'ol/style/fill'
 import olStyleCircle from 'ol/style/circle'
 import olStyleStroke from 'ol/style/stroke'
 
+import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion'
+
 import styled from 'styled-components'
 import '../App.css';
 import { Map, VectorLayer, centerAndZoom, Popup } from '@bayer/ol-kit'
@@ -44,7 +46,6 @@ const Header = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-
 `
 
 const Content = styled.div`
@@ -98,15 +99,51 @@ const PillText = styled.p`
   color: #424242;
 `
 
-const Card = styled.div`
+const Card = styled(motion.div)`
+  max-width: 300px;
   width: 90%;
-  height: 90px;
-  min-height: 90px;
+  min-height: 200px;
+  margin: 20px;
   border-radius: 15px;
   overflow: hidden;
   max-width: 600px;
   box-shadow: none;
   background: #f3f3f3;
+  cursor: pointer;
+
+  &:hover {
+    background: #00000075
+  }
+`
+
+const ModalCard = styled(motion.div)`
+  width: ${p => p.width}px;
+  height: 100%;
+  min-height: 90px;
+  overflow: hidden;
+  max-width: 600px;
+  box-shadow: none;
+  background: white;
+  position: fixed;
+  will-change: opacity;
+  max-width: 990px;
+  z-index: 10;
+  box-shadow: 0px 10px 20px #222222a6;
+  background: #f3f3f3;
+  top: 0;
+  max-width: 900px;
+  max-height: 900px;
+`
+
+const ModalCloseButton = styled.i`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.67);
+  color: white;
+  border-radius: 50px;
+  padding: 1px;
+  cursor: pointer;
 `
 
 const Image = styled.img`
@@ -119,28 +156,28 @@ const Image = styled.img`
 `
 
 const CardContent = styled.div`
+  position: absolute;
+  top: 0px;
+  left: 0px;
   width: 100%;
   padding: 10px 15px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
 `
 
-const CardTitle = styled.p`
-  float: right;
-  margin: 0;
-  color: #424242;
-  letter-spacing: 1px;
-  font-weight: 700;
+const CardMotionImage = styled(motion.img)`
+  width: 100%;
+  height: 50%;
 `
 
 const CardFooter = styled.p`
   float: right;
   margin: 0;
-  color: ${props => props.color};
-  font-size: 0.8rem;
+  color: white;
   bottom: 0;
+  font-weight: 700;
 `
 
 const PageTitle = styled.h5`
@@ -158,6 +195,15 @@ const MapContainer = styled.div`
   top: 30%;
   bottom: unset;
   left: unset;
+`
+
+const ModalImageText = styled.div`
+  position: absolute;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  /* align-items: flex-end; */
+  left: 10px;
 `
 
 function timeSince(dateTime) {
@@ -197,17 +243,26 @@ class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, potholes: [], map: null, width: 400 }
+    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null }
   }
 
   async componentDidMount () {
-    
+    const { match } = this.props
     const { width } = document.getElementById('page-content').getBoundingClientRect()
 
     this.setState({ width })
-    await this.makeMapChanges()
+    await this.getPotholes().then(() => {
+      console.log("hahdhaah")
+      console.log("potholes", this.state.potholes)
+      console.log("match params", match)
+      const found = this.state.potholes.find(pothole => pothole.id === Number(match.params.id))
+      console.log(found)
+      if (found) {
+        this.setState({ selectedPothole: found })
+      }
+    })
 
-    setInterval(this.makeMapChanges, 60000)
+    setInterval(this.getPotholes, 60000)
   }
 
   sortPotholes = (a, b) => {
@@ -220,7 +275,7 @@ class Home extends Component {
     }
   } 
 
-  makeMapChanges = async () => {
+  getPotholes = async () => {
     const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
     const allPoints = await response.json()
 
@@ -352,6 +407,8 @@ class Home extends Component {
   }
 
   render () {
+    const { selectedPothole } = this.state
+
     return (
       <div style={container} id='page-content'>
         <Header>
@@ -365,29 +422,51 @@ class Home extends Component {
           </PillContainer>
         </Header>
         <Content  activePage={this.state.activePage} width={this.state.width}>
-          
-          { this.state.potholes.map((pothole) => (
-            <Card className="card horizontal" key={pothole.id}>
-              <div className="card-image">
-                <Image src={pothole.image_url} />
-              </div>
+        <AnimateSharedLayout type="crossfade">
+          {this.state.potholes.map(pothole => (
+            <Card layoutId={pothole.id} onClick={() => this.setState({ selectedPothole: pothole })} className="card">
+              <motion.div className="card-image">
+                <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
+              </motion.div>
               <CardContent>
-                <CardTitle>Pothole</CardTitle>
-                <CardFooter color='gray'>{pothole.address}</CardFooter>
-                <CardFooter color='lightgray'>Added {timeSince(pothole.createddate)} ago</CardFooter>
+                <CardFooter>{pothole.address}</CardFooter>
+                <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
               </CardContent>
             </Card>
           ))}
-          
+
+          <AnimatePresence>
+            {this.state.selectedPothole && (
+              <ModalCard width={this.state.width} layoutId={selectedPothole.id} className="overlay">
+                
+                <div style={{ position: 'relative' }}>
+                <CardMotionImage src={selectedPothole.image_url} />
+                  <ModalImageText>
+                    <CardFooter>{selectedPothole.address}</CardFooter>
+                    <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
+                  </ModalImageText>
+                </div>
+                <div>
+                  <motion.h5>{this.state.selectedPothole.id}</motion.h5>
+                  <motion.h2>{this.state.selectedPothole.priority}</motion.h2>
+                </div>
+                  <ModalCloseButton onClick={() => this.setState({ selectedPothole: null })} className="material-icons">close</ModalCloseButton>
+              </ModalCard>
+            )}
+          </AnimatePresence>
+        </AnimateSharedLayout>
         </Content>
         <MapContainer activePage={this.state.activePage} width={this.state.width}>
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} />
         </MapContainer>
 
-        <a
-          style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
+        
+
+        <a style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
           onClick={() => document.getElementById('file-upload').click()}
-          class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">add</i></a>
+          className="btn-floating btn-large waves-effect waves-light">
+            <i className="material-icons">add</i>
+        </a>
           <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
             this.handleChange(e)
             this.setState({ open: false })
