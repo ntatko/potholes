@@ -110,6 +110,7 @@ const Card = styled(motion.div)`
   box-shadow: none;
   background: #f3f3f3;
   cursor: pointer;
+  transition: left 0.3s ease 0s;
 
   &:hover {
     background: #00000075
@@ -488,6 +489,23 @@ class Home extends Component {
       const response = await fetch(url)
       const updatedFeature = await response.json()
       this.setState({selectedPothole: updatedFeature})
+
+      const feature = this.state.map.getLayers().getArray().find(layer => layer.get('title') === "Potholes").getSource().getFeatures().find(feat => feat.get('id') === updatedFeature.id)
+      
+      feature.setStyle(new olStyleStyle({
+        image: new olStyleCircle({
+          radius: 5,
+          fill: new olStyleFill({
+            color: priorityStyle[updatedFeature.priority]
+          }),
+          stroke: new olStyleStroke({
+            color: 'black',
+            width: 2
+          })
+        })
+      }))
+
+      feature.set('priority', string)
 
       const nextResponse = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
       const newPotholes = await nextResponse.json()
