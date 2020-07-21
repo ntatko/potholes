@@ -22,7 +22,6 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
-    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/`
     await navigator?.permissions?.query({name:'geolocation'})
   }
 
