@@ -586,6 +586,9 @@ class Home extends Component {
               drag="x"
               dragConstraints={{ left: -200, right: 200 }}
               whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
               <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
               <motion.div className="card-image">
