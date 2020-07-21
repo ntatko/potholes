@@ -133,6 +133,7 @@ const ModalCard = styled(motion.div)`
   top: 0;
   max-width: 900px;
   max-height: 900px;
+  border-radius: 15px;
 `
 
 const ModalCloseButton = styled.i`
