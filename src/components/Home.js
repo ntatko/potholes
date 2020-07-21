@@ -292,9 +292,10 @@ class Home extends Component {
 
   getPotholes = async () => {
     const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
-    const allPoints = await response.json()
+    const points = await response.json()
 
-    allPoints.sort(this.sortPotholes)
+    points.sort(this.sortPotholes)
+    const allPoints = points.filter(pothole => !pothole.archived)
 
     const newPoints = allPoints.filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
     if (newPoints.length) {
@@ -472,6 +473,38 @@ class Home extends Component {
 
   handleCardDragChange = async (event, info, pothole) => {
     console.log("the data that we have", info, pothole)
+
+    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/${pothole.id}`
+    if (info.offset.x < -250) {
+      console.log('deleting pothole')
+      try{
+        await fetch(url, {method: "DELETE"})
+      } catch (err) {
+        console.error(err)
+      }
+    } else if (info.offset.x > 250) {
+      console.log("archiving pothole")
+      try{
+        await fetch(url, {
+          method: "PATCH",
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            archived: true
+          })
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    } else {
+      return
+    }
+    const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
+    const allPotholes = await response.json()
+
+    allPotholes.sort(this.sortPotholes)
+    this.setState({ potholes: allPotholes.filter(pothole => !pothole.archived) })
   }
 
   setPriority = async string => {
@@ -515,7 +548,7 @@ class Home extends Component {
       const newPotholes = await nextResponse.json()
 
       newPotholes.sort(this.sortPotholes)
-      this.setState({potholes: newPotholes})
+      this.setState({potholes: newPotholes.filter(pothole => !pothole.archived)})
 
     } catch (err) {
       console.error(err)
@@ -544,8 +577,7 @@ class Home extends Component {
               layoutId={pothole.id}
               dragDirectionLock
               onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
-              onPanStart={() => this.setState({ dragging: true })}
-              onDrag={(event, info) => console.log("drag data", event, info)}
+              onDragStart={() => this.setState({ dragging: true })}
               onDragEnd={async (event, info) => {
                 setTimeout(() => this.setState({ dragging: false }), 1)
                 await this.handleCardDragChange(event, info, pothole)
@@ -553,7 +585,6 @@ class Home extends Component {
               className="card"
               drag="x"
               dragConstraints={{ left: -200, right: 200 }}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
