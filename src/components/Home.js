@@ -167,6 +167,13 @@ const CardContent = styled.div`
   justify-content: space-between;
 `
 
+const CardPriority = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px 15px;
+`
+
 const CardMotionImage = styled(motion.img)`
   width: 100%;
   height: 50%;
@@ -204,6 +211,13 @@ const ModalImageText = styled.div`
   flex-direction: column;
   /* align-items: flex-end; */
   left: 10px;
+`
+
+const ModalImageButtons = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
 `
 
 function timeSince(dateTime) {
@@ -365,6 +379,55 @@ class Home extends Component {
     })
   }
   
+  loadMinimap = (map) => {
+    const { selectedPothole } = this.state
+    const opts = {
+      x: selectedPothole.location_lon,
+      y: selectedPothole.location_lat,
+      zoom: 18
+    }
+    centerAndZoom(map, opts)
+
+    const layer = new VectorLayer({
+      title: 'Potholes',
+      style: feature => {
+        if (!feature) return new olStyleStyle({
+          image: new olStyleCircle({
+            radius: 5,
+            fill: new olStyleFill({
+              color: '#000'
+            }),
+          })
+        })
+        return new olStyleStyle({
+          image: new olStyleCircle({
+            radius: 5,
+            fill: new olStyleFill({
+              color: priorityStyle[feature.get('priority')]
+            }),
+            stroke: new olStyleStroke({
+              color: 'black',
+              width: 2
+            })
+          })
+        })
+      },
+      source: new olSourceVector({
+        features: [
+          new olFeature({
+            feature_type: ['pothole'],
+            title: 'pothole',
+            name: 'pothole',
+            id: selectedPothole.id,
+            ...selectedPothole,
+            geometry: new olGeomPoint(olProj.fromLonLat([selectedPothole.location_lon, selectedPothole.location_lat]))
+          })
+        ]
+      })
+    })
+
+    map.addLayer(layer)
+  }
 
   onMapInit = (map) => {
     const opts = {
@@ -406,6 +469,30 @@ class Home extends Component {
     window.map = map
   }
 
+  setPriority = async string => {
+    const { selectedPothole } = this.state
+
+    console.log("trying to set priority...")
+
+    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/${selectedPothole.id}`
+    try {
+      await fetch(url, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          priority: string
+        })
+      })
+
+      const response = await fetch(url)
+      const updatedFeature = await response.json()
+      console.log("updated Feature", updatedFeature)
+      this.setState({selectedPothole: updatedFeature})
+
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   render () {
     const { selectedPothole } = this.state
 
@@ -428,11 +515,16 @@ class Home extends Component {
               <motion.div className="card-image">
                 <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
               </motion.div>
-              <CardContent>
-                <CardFooter>{pothole.address}</CardFooter>
-                <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
-              </CardContent>
-            </Card>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <CardContent>
+                  <CardFooter>{pothole.address}</CardFooter>
+                  <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
+                </CardContent>
+                {pothole.priority !== 'low' && (<CardPriority>
+                  <i style={{color: priorityStyle[pothole.priority] }} className="material-icons">error</i>
+                </CardPriority>)}
+              </div>
+          </Card>
           ))}
 
           <AnimatePresence>
@@ -440,17 +532,29 @@ class Home extends Component {
               <ModalCard width={this.state.width} layoutId={selectedPothole.id} className="overlay">
                 
                 <div style={{ position: 'relative' }}>
-                <CardMotionImage src={selectedPothole.image_url} />
-                  <ModalImageText>
-                    <CardFooter>{selectedPothole.address}</CardFooter>
-                    <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
-                  </ModalImageText>
+                  <CardMotionImage src={selectedPothole.image_url} style={{ maxHeight: '70vh' }} />
+                  <div style={{display: 'flex', justifyContent: 'space-between' }}>
+                    <ModalImageText>
+                      <CardFooter>{selectedPothole.address}</CardFooter>
+                      <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
+                    </ModalImageText>
+                    <ModalImageButtons>
+                      {['low', 'medium', 'high'].map(level => 
+                        <a key={level} style={ selectedPothole.priority === level ? { background: priorityStyle[level] } : {background: 'transparent'}}
+                          onClick={() => this.setPriority(level)}
+                          className="btn-floating btn-large waves-effect waves-light">
+                            <i color={selectedPothole.priority === level ? 'white' : priorityStyle[level]} className="material-icons">warning</i>
+                        </a>
+                      )}
+                    </ModalImageButtons>
+                  </div>
                 </div>
                 <div>
+                  <Map onMapInit={this.loadMinimap} updateUrlFromView={false} updateViewFromUrl={false} />
                   <motion.h5>{this.state.selectedPothole.id}</motion.h5>
                   <motion.h2>{this.state.selectedPothole.priority}</motion.h2>
                 </div>
-                  <ModalCloseButton onClick={() => this.setState({ selectedPothole: null })} className="material-icons">close</ModalCloseButton>
+                <ModalCloseButton onClick={() => this.setState({ selectedPothole: null })} className="material-icons">close</ModalCloseButton>
               </ModalCard>
             )}
           </AnimatePresence>
@@ -460,17 +564,15 @@ class Home extends Component {
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} />
         </MapContainer>
 
-        
-
         <a style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
           onClick={() => document.getElementById('file-upload').click()}
           className="btn-floating btn-large waves-effect waves-light">
             <i className="material-icons">add</i>
         </a>
-          <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
-            this.handleChange(e)
-            this.setState({ open: false })
-          }} />
+        <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
+          this.handleChange(e)
+          this.setState({ open: false })
+        }} />
       </div>
     )
   }
