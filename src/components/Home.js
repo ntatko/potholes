@@ -118,7 +118,7 @@ const Card = styled(motion.div)`
 
 const ModalCard = styled(motion.div)`
   width: ${p => p.width}px;
-  height: 100%;
+  height: 100vh;
   min-height: 90px;
   overflow: hidden;
   max-width: 600px;
@@ -470,6 +470,10 @@ class Home extends Component {
     window.map = map
   }
 
+  handleCardDragChange = async (event, info, pothole) => {
+    console.log("the data that we have", info, pothole)
+  }
+
   setPriority = async string => {
     const { selectedPothole } = this.state
 
@@ -538,10 +542,14 @@ class Home extends Component {
           {this.state.potholes.map(pothole => (
             <Card
               layoutId={pothole.id}
-              onTap={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
+              dragDirectionLock
+              onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
               onPanStart={() => this.setState({ dragging: true })}
-              onDrag={(event, info) => console.log("drag finished", event, info)}
-              onDragEnd={(event, info) => {setTimeout(() => this.setState({ dragging: false }), 1)}}
+              onDrag={(event, info) => console.log("drag data", event, info)}
+              onDragEnd={async (event, info) => {
+                setTimeout(() => this.setState({ dragging: false }), 1)
+                await this.handleCardDragChange(event, info, pothole)
+              }}
               className="card"
               drag="x"
               dragConstraints={{ left: -200, right: 200 }}
