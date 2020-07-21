@@ -80,11 +80,22 @@ const priorityStyle = {
   low: 'yellow'
 }
 
+const getFeature = (pothole) => {
+  return new olFeature({
+    feature_type: ['pothole'],
+    title: 'pothole',
+    name: 'pothole',
+    id: pothole.id,
+    ...pothole,
+    geometry: new olGeomPoint(olProj.fromLonLat([pothole.location_lon, pothole.location_lat]))
+  })
+}
+
 class Home extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false  }
+    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false, sortBy: 'createddate' }
   }
 
   async componentDidMount () {
@@ -103,9 +114,10 @@ class Home extends Component {
   }
 
   sortPotholes = (a, b) => {
-    if (a.createddate < b.createdDate) {
+    const { sortBy } = this.state
+    if (a[sortBy] < b[sortBy]) {
       return 1
-    } else if (a.createddate > b.createddate) {
+    } else if (a[sortBy] > b[sortBy]) {
       return -1
     } else {
       return 0
@@ -123,16 +135,7 @@ class Home extends Component {
     if (newPoints.length) {
       const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
 
-      newPoints.map(point => {
-        return new olFeature({
-          feature_type: ['pothole'],
-          title: 'pothole',
-          name: 'pothole',
-          id: point.id,
-          ...point,
-          geometry: new olGeomPoint(olProj.fromLonLat([point.location_lon, point.location_lat]))
-        })
-      }).forEach(point => {
+      newPoints.map(getFeature).forEach(point => {
         layer.getSource().addFeature(point)
       })
       this.setState({ potholes: allPoints })
@@ -150,7 +153,7 @@ class Home extends Component {
     }
   }
 
-  handleChange = async event => {
+  handleImageUpload = async event => {
     const file = event.target.files[0];
     const props = this.props
 
@@ -223,16 +226,7 @@ class Home extends Component {
         })
       },
       source: new olSourceVector({
-        features: [
-          new olFeature({
-            feature_type: ['pothole'],
-            title: 'pothole',
-            name: 'pothole',
-            id: selectedPothole.id,
-            ...selectedPothole,
-            geometry: new olGeomPoint(olProj.fromLonLat([selectedPothole.location_lon, selectedPothole.location_lat]))
-          })
-        ]
+        features: [ getFeature(selectedPothole) ]
       })
     })
 
@@ -456,7 +450,7 @@ class Home extends Component {
             <i className="material-icons">add</i>
         </a>
         <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
-          this.handleChange(e)
+          this.handleImageUpload(e)
           this.setState({ open: false })
         }} />
       </div>
