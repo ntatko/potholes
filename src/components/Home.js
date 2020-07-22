@@ -260,41 +260,44 @@ class Home extends Component {
   handleCardDragChange = async (_, info, pothole) => {
 
     const url = `${window.serviceBindings.GEOKIT_API_URL}/report/${pothole.id}`
-    if (info.offset.x < -250) {
-      console.log('deleting pothole')
-      try{
-        await fetch(url, {method: "DELETE"})
-      } catch (err) {
-        console.error(err)
-      }
-    } else if (info.offset.x > 250) {
-      console.log("archiving pothole")
-      try{
-        await fetch(url, {
-          method: "PATCH",
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
-            archived: true
+    if (info.offset.y < 300 && info.offset.y > -300) {
+      if (info.offset.x < -250) {
+        console.log('deleting pothole')
+        try{
+          await fetch(url, {method: "DELETE"})
+        } catch (err) {
+          console.error(err)
+        }
+      } else if (info.offset.x > 250) {
+        console.log("archiving pothole")
+        try{
+          await fetch(url, {
+            method: "PATCH",
+            headers: {
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+              archived: true
+            })
           })
-        })
-      } catch (err) {
-        console.error(err)
+        } catch (err) {
+          console.error(err)
+        }
+      } else {
+        return
       }
-    } else {
-      return
-    }
-    const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
-    const allPotholes = await response.json()
+      const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
+      const allPotholes = await response.json()
 
-    allPotholes.sort(this.sortPotholes)
-    this.setState({ potholes: allPotholes.filter(pothole => !pothole.archived) })
+      allPotholes.sort(this.sortPotholes)
+      this.setState({ potholes: allPotholes.filter(pothole => !pothole.archived) })
+    }
   }
 
   handleDragSroll = (_, info) => {
     console.log("scrolling cards?")
-    this.scrollRef.current.scrollTo(0, -info.offset.y)
+    console.log(this.scrollRef.current.scrollY || this.scrollRef.current.scrollTop)
+    this.scrollRef.current.scrollTo(0, this.state.scrollPosition - info.offset.y)
   }
 
   setPriority = async string => {
@@ -370,7 +373,7 @@ class Home extends Component {
                 layoutId={pothole.id}
                 dragDirectionLock
                 onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
-                onDragStart={() => this.setState({ dragging: true })}
+                onDragStart={() => this.setState({ dragging: true, scrollPosition: this.scrollRef.current.scrollY || this.scrollRef.current.scrollTop })}
                 onDrag={this.handleDragSroll}
                 onDragEnd={async (event, info) => {
                   setTimeout(() => this.setState({ dragging: false }), 1)
