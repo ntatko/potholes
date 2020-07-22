@@ -96,10 +96,41 @@ const getFeature = (pothole) => {
   })
 }
 
+const getLayer = (features) => {
+  return new VectorLayer({
+    title: 'Potholes',
+    style: feature => {
+      if (!feature) return new olStyleStyle({
+        image: new olStyleCircle({
+          radius: 5,
+          fill: new olStyleFill({
+            color: '#000'
+          }),
+        })
+      })
+      return new olStyleStyle({
+        image: new olStyleCircle({
+          radius: 5,
+          fill: new olStyleFill({
+            color: priorityStyle[feature.get('priority')]
+          }),
+          stroke: new olStyleStroke({
+            color: 'black',
+            width: 2
+          })
+        })
+      })
+    },
+    source: new olSourceVector({
+      features
+    })
+  })
+}
+
 class Home extends Component {
   constructor (props) {
     super(props)
-
+    this.scrollRef = React.createRef()
     this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false, sortBy: 'createddate' }
   }
 
@@ -206,34 +237,7 @@ class Home extends Component {
     }
     centerAndZoom(map, opts)
 
-    const layer = new VectorLayer({
-      title: 'Potholes',
-      style: feature => {
-        if (!feature) return new olStyleStyle({
-          image: new olStyleCircle({
-            radius: 5,
-            fill: new olStyleFill({
-              color: '#000'
-            }),
-          })
-        })
-        return new olStyleStyle({
-          image: new olStyleCircle({
-            radius: 5,
-            fill: new olStyleFill({
-              color: priorityStyle[feature.get('priority')]
-            }),
-            stroke: new olStyleStroke({
-              color: 'black',
-              width: 2
-            })
-          })
-        })
-      },
-      source: new olSourceVector({
-        features: [ getFeature(selectedPothole) ]
-      })
-    })
+    const layer = getLayer([ getFeature(selectedPothole) ])
 
     map.addLayer(layer)
   }
@@ -246,32 +250,7 @@ class Home extends Component {
     }
     centerAndZoom(map, opts)
 
-    const layer = new VectorLayer({
-      title: 'Potholes',
-      style: feature => {
-        if (!feature) return new olStyleStyle({
-          image: new olStyleCircle({
-            radius: 5,
-            fill: new olStyleFill({
-              color: '#000'
-            }),
-          })
-        })
-        return new olStyleStyle({
-          image: new olStyleCircle({
-            radius: 5,
-            fill: new olStyleFill({
-              color: priorityStyle[feature.get('priority')]
-            }),
-            stroke: new olStyleStroke({
-              color: 'black',
-              width: 2
-            })
-          })
-        })
-      },
-      source: new olSourceVector()
-    })
+    const layer = getLayer([])
 
     map.addLayer(layer)
     this.setState({ map })
@@ -311,6 +290,11 @@ class Home extends Component {
 
     allPotholes.sort(this.sortPotholes)
     this.setState({ potholes: allPotholes.filter(pothole => !pothole.archived) })
+  }
+
+  handleDragSroll = (_, info) => {
+    console.log("scrolling cards?")
+    this.scrollRef.current.scrollTo(0, -info.offset.y)
   }
 
   setPriority = async string => {
@@ -376,7 +360,7 @@ class Home extends Component {
             <Slider activePage={this.state.activePage} />
           </PillContainer>
         </Header>
-        <Content  activePage={this.state.activePage} width={this.state.width}>
+        <Content ref={this.scrollRef} activePage={this.state.activePage} width={this.state.width}>
         <AnimateSharedLayout type="crossfade">
           {this.state.potholes.map(pothole => (
             <CardBack>
@@ -387,6 +371,7 @@ class Home extends Component {
                 dragDirectionLock
                 onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
                 onDragStart={() => this.setState({ dragging: true })}
+                onDrag={this.handleDragSroll}
                 onDragEnd={async (event, info) => {
                   setTimeout(() => this.setState({ dragging: false }), 1)
                   await this.handleCardDragChange(event, info, pothole)
