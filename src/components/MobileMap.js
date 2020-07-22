@@ -126,7 +126,7 @@ class MobileMap extends Component {
         <Map fullScreen onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
           <div style={container}>
             <i style={icon} className="medium material-icons">place</i>
-            <button style={button} onClick={this.handleClick} className='waves-effect waves-light btn'>Looks Good</button>
+            <button disabled={this.state.loading} style={button} onClick={this.handleClick} className='waves-effect waves-light btn'>Looks Good</button>
           </div>
         </Map>
         {this.state.loading && <PaleDiv>
