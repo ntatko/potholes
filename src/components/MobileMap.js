@@ -35,7 +35,8 @@ const button = {
   fontWeight: '700',
   boxShadow: 'rgba(0, 0, 0, 0.81) 0 10px 25px 0px',
   position: 'absolute',
-  bottom: '10%'
+  bottom: '10%',
+  maxWidth: '300px'
 }
 
 const icon = {

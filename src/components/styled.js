@@ -55,6 +55,7 @@ export const PillText = styled.p`
 
 export const Card = styled(motion.div)`
   min-height: 200px;
+  margin: 0;
   border-radius: 15px;
   overflow: hidden;
   max-width: 600px;
