@@ -182,7 +182,7 @@ class Home extends Component {
       const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
 
       deadPoints.forEach(point => {
-        layer.getSource().removeFeature(layer.getSource().getFeatureById(point.id))
+        layer.getSource().removeFeature(layer.getSource().getFeatures().find(feature => feature.get('id') === point.id))
       })
 
       this.setState({ potholes: allPoints })
