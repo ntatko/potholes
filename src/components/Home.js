@@ -456,7 +456,7 @@ class Home extends Component {
         <a style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
           onClick={() => document.getElementById('file-upload').click()}
           className="btn-floating btn-large waves-effect waves-light">
-            <i className="material-icons">add</i>
+            <i className="material-icons add">add</i>
         </a>
         <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
           this.handleImageUpload(e)
