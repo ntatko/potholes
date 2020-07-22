@@ -54,10 +54,7 @@ export const PillText = styled.p`
 `
 
 export const Card = styled(motion.div)`
-  max-width: 300px;
-  width: 90%;
   min-height: 200px;
-  margin: 20px;
   border-radius: 15px;
   overflow: hidden;
   max-width: 600px;
@@ -69,6 +66,14 @@ export const Card = styled(motion.div)`
   &:hover {
     background: #00000075
   }
+`
+
+export const CardBack = styled.div`
+  max-width: 600px;
+  width: 90%;
+  overflow: show;
+  position: relative;
+  margin: 20px;
 `
 
 export const ModalCard = styled(motion.div)`

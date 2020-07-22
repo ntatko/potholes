@@ -16,7 +16,12 @@ import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion'
 import '../App.css';
 import { Map, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
 
-import { Header, Content, PillContainer, Slider, PillText, Card, ModalCard, ModalCloseButton, CardContent, CardPriority, PageTitle, CardFooter, CardMotionImage, ModalImageText, ModalImageButtons, MapContainer} from './styled'
+import { Header, Content, PillContainer, Slider,
+  PillText, Card, ModalCard, ModalCloseButton,
+  CardContent, CardPriority, PageTitle, CardFooter,
+  CardMotionImage, ModalImageText, ModalImageButtons,
+  MapContainer, CardBack
+} from './styled'
 
 const container = {
   height: '100%'
@@ -374,37 +379,41 @@ class Home extends Component {
         <Content  activePage={this.state.activePage} width={this.state.width}>
         <AnimateSharedLayout type="crossfade">
           {this.state.potholes.map(pothole => (
-            <Card
-              layoutId={pothole.id}
-              dragDirectionLock
-              onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
-              onDragStart={() => this.setState({ dragging: true })}
-              onDragEnd={async (event, info) => {
-                setTimeout(() => this.setState({ dragging: false }), 1)
-                await this.handleCardDragChange(event, info, pothole)
-              }}
-              className="card"
-              drag="x"
-              dragConstraints={{ left: -200, right: 200 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
-              <motion.div className="card-image">
-                <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
-              </motion.div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                <CardContent>
-                  <CardFooter>{pothole.address}</CardFooter>
-                  <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
-                </CardContent>
-                {pothole.priority !== 'low' && (<CardPriority>
-                  <i style={{color: priorityStyle[pothole.priority] }} className="material-icons">error</i>
-                </CardPriority>)}
-              </div>
-          </Card>
+            <CardBack>
+              <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em'}} className="material-icons">delete_forever</i>
+              <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em'}} className="material-icons">done_outline</i>
+              <Card
+                layoutId={pothole.id}
+                dragDirectionLock
+                onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
+                onDragStart={() => this.setState({ dragging: true })}
+                onDragEnd={async (event, info) => {
+                  setTimeout(() => this.setState({ dragging: false }), 1)
+                  await this.handleCardDragChange(event, info, pothole)
+                }}
+                className="card"
+                drag="x"
+                dragConstraints={{ left: -200, right: 200 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
+                <motion.div className="card-image">
+                  <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
+                </motion.div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                  <CardContent>
+                    <CardFooter>{pothole.address}</CardFooter>
+                    <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
+                  </CardContent>
+                  {pothole.priority !== 'low' && (<CardPriority>
+                    <i style={{color: priorityStyle[pothole.priority], fontSize: '2em' }} className="material-icons">error</i>
+                  </CardPriority>)}
+                </div>
+            </Card>
+          </CardBack>
           ))}
 
           <AnimatePresence>
