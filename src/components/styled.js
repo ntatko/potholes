@@ -61,6 +61,7 @@ export const Card = styled(motion.div)`
   max-width: 600px;
   box-shadow: none;
   background: #f3f3f3;
+  max-height: 250px;
   cursor: pointer;
   transition: left 0.3s ease 0s;
 
