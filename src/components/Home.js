@@ -295,8 +295,6 @@ class Home extends Component {
   }
 
   handleDragSroll = (_, info) => {
-    console.log("scrolling cards?")
-    console.log(this.scrollRef.current.scrollY || this.scrollRef.current.scrollTop)
     this.scrollRef.current.scrollTo(0, this.state.scrollPosition - info.offset.y)
   }
 
