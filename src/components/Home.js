@@ -364,78 +364,78 @@ class Home extends Component {
           </PillContainer>
         </Header>
         <Content ref={this.scrollRef} activePage={this.state.activePage} width={this.state.width}>
-        <AnimateSharedLayout type="crossfade">
-          {this.state.potholes.map(pothole => (
-            <CardBack>
-              <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em'}} className="material-icons">delete_forever</i>
-              <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em'}} className="material-icons">done_outline</i>
-              <Card
-                layoutId={pothole.id}
-                dragDirectionLock
-                onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
-                onDragStart={() => this.setState({ dragging: true, scrollPosition: this.scrollRef.current.scrollY || this.scrollRef.current.scrollTop })}
-                onDrag={this.handleDragSroll}
-                onDragEnd={async (event, info) => {
-                  setTimeout(() => this.setState({ dragging: false }), 1)
-                  await this.handleCardDragChange(event, info, pothole)
-                }}
-                className="card"
-                drag="x"
-                dragConstraints={{ left: -200, right: 200 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
-                <motion.div className="card-image">
-                  <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
-                </motion.div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <CardContent>
-                    <CardFooter>{pothole.address}</CardFooter>
-                    <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
-                  </CardContent>
-                  {pothole.priority !== 'low' && (<CardPriority>
-                    <i style={{color: priorityStyle[pothole.priority], fontSize: '2em' }} className="material-icons">error</i>
-                  </CardPriority>)}
-                </div>
-            </Card>
-          </CardBack>
-          ))}
-
-          <AnimatePresence>
-            {this.state.selectedPothole && (
-              <ModalCard width={this.state.width} layoutId={selectedPothole.id} className="overlay">
-                
-                <div style={{ position: 'relative' }}>
-                  <CardMotionImage src={selectedPothole.image_url} style={{ maxHeight: '70vh' }} />
-                  <div style={{display: 'flex', justifyContent: 'space-between' }}>
-                    <ModalImageText>
-                      <CardFooter>{selectedPothole.address}</CardFooter>
-                      <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
-                    </ModalImageText>
-                    <ModalImageButtons>
-                      {['low', 'medium', 'high'].map(level => 
-                        <a key={level} style={ selectedPothole.priority === level ? { background: priorityStyle[level] } : {background: 'transparent'}}
-                          onClick={() => this.setPriority(level)}
-                          className="btn-floating btn-large waves-effect waves-light">
-                            <i style={selectedPothole.priority === level ? {color: 'white'} : {color: priorityStyle[level]}} className="material-icons">warning</i>
-                        </a>
-                      )}
-                    </ModalImageButtons>
+          <AnimateSharedLayout type="crossfade">
+            {this.state.potholes.map(pothole => (
+              <CardBack>
+                <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em'}} className="material-icons">delete_forever</i>
+                <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em'}} className="material-icons">done_outline</i>
+                <Card
+                  layoutId={pothole.id}
+                  dragDirectionLock
+                  onClick={() => !this.state.dragging && this.setState({ selectedPothole: pothole })}
+                  onDragStart={() => this.setState({ dragging: true, scrollPosition: this.scrollRef.current.scrollY || this.scrollRef.current.scrollTop })}
+                  onDrag={this.handleDragSroll}
+                  onDragEnd={async (event, info) => {
+                    setTimeout(() => this.setState({ dragging: false }), 1)
+                    await this.handleCardDragChange(event, info, pothole)
+                  }}
+                  className="card"
+                  drag="x"
+                  dragConstraints={{ left: -200, right: 200 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
+                  <motion.div className="card-image">
+                    <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
+                  </motion.div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <CardContent>
+                      <CardFooter>{pothole.address}</CardFooter>
+                      <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
+                    </CardContent>
+                    {pothole.priority !== 'low' && (<CardPriority>
+                      <i style={{color: priorityStyle[pothole.priority], fontSize: '2em' }} className="material-icons">error</i>
+                    </CardPriority>)}
                   </div>
-                </div>
-                <div>
-                  <Map onMapInit={this.loadMinimap} updateUrlFromView={false} updateViewFromUrl={false} />
-                  <motion.h5>{this.state.selectedPothole.id}</motion.h5>
-                  <motion.h2>{this.state.selectedPothole.priority}</motion.h2>
-                </div>
-                <ModalCloseButton onClick={() => this.setState({ selectedPothole: null })} className="material-icons">close</ModalCloseButton>
-              </ModalCard>
-            )}
-          </AnimatePresence>
-        </AnimateSharedLayout>
+              </Card>
+            </CardBack>
+            ))}
+
+            <AnimatePresence>
+              {this.state.selectedPothole && (
+                <ModalCard width={this.state.width} layoutId={selectedPothole.id} className="overlay">
+                  
+                  <div style={{ position: 'relative' }}>
+                    <CardMotionImage src={selectedPothole.image_url} style={{ maxHeight: '70vh' }} />
+                    <div style={{display: 'flex', justifyContent: 'space-between' }}>
+                      <ModalImageText>
+                        <CardFooter>{selectedPothole.address}</CardFooter>
+                        <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
+                      </ModalImageText>
+                      <ModalImageButtons>
+                        {['low', 'medium', 'high'].map(level => 
+                          <a key={level} style={ selectedPothole.priority === level ? { background: priorityStyle[level] } : {background: 'transparent'}}
+                            onClick={() => this.setPriority(level)}
+                            className="btn-floating btn-large waves-effect waves-light">
+                              <i style={selectedPothole.priority === level ? {color: 'white'} : {color: priorityStyle[level]}} className="material-icons">warning</i>
+                          </a>
+                        )}
+                      </ModalImageButtons>
+                    </div>
+                  </div>
+                  <div>
+                    <Map onMapInit={this.loadMinimap} updateUrlFromView={false} updateViewFromUrl={false} />
+                    <motion.h5>{this.state.selectedPothole.id}</motion.h5>
+                    <motion.h2>{this.state.selectedPothole.priority}</motion.h2>
+                  </div>
+                  <ModalCloseButton onClick={() => this.setState({ selectedPothole: null })} className="material-icons">close</ModalCloseButton>
+                </ModalCard>
+              )}
+            </AnimatePresence>
+          </AnimateSharedLayout>
         </Content>
         <MapContainer activePage={this.state.activePage} width={this.state.width}>
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} />
