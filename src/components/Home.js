@@ -131,7 +131,7 @@ class Home extends Component {
   constructor (props) {
     super(props)
     this.scrollRef = React.createRef()
-    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false, sortBy: 'createddate' }
+    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false, sortBy: 'createddate', opacity: 0.0 }
   }
 
   async componentDidMount () {
@@ -296,6 +296,7 @@ class Home extends Component {
 
   handleDragSroll = (_, info) => {
     this.scrollRef.current.scrollTo(0, this.state.scrollPosition - info.offset.y)
+    this.setState({ opacity: Math.abs(info.offset.x/250) })
   }
 
   setPriority = async string => {
@@ -365,8 +366,8 @@ class Home extends Component {
           <AnimateSharedLayout type="crossfade">
             {this.state.potholes.map(pothole => (
               <CardBack>
-                <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em'}} className="material-icons">delete_forever</i>
-                <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em'}} className="material-icons">done_outline</i>
+                <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">delete_forever</i>
+                <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">done_outline</i>
                 <Card
                   layoutId={pothole.id}
                   dragDirectionLock
@@ -381,9 +382,6 @@ class Home extends Component {
                   drag="x"
                   dragConstraints={{ left: -200, right: 200 }}
                   whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                 >
                   <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 10}} />
                   <motion.div className="card-image">
