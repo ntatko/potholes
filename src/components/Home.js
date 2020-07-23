@@ -255,6 +255,14 @@ class Home extends Component {
     map.addLayer(layer)
     this.setState({ map })
     window.map = map
+
+    map.on('click', (event) => {
+      map.forEachFeatureAtPixel(event.pixel, (feature) => {
+        this.setState({ selectedPothole: this.state.potholes.find(({id}) => feature.get('id') === id), activePage: 0 })
+      }, {
+        hitTolerance: 15
+      })
+    })
   }
 
   handleCardDragChange = async (_, info, pothole) => {
