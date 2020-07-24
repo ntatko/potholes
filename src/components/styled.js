@@ -109,16 +109,17 @@ export const ModalCloseButton = styled.i`
   cursor: pointer;
 `
 
-export const CardContent = styled.div`
+export const CardContent = styled(motion.div)`
   position: absolute;
   top: 0px;
   left: 0px;
-  width: 100%;
   padding: 10px 15px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
 `
 
 export const CardPriority = styled.div`
