@@ -159,16 +159,34 @@ export const MapContainer = styled.div`
 
 export const ModalImageText = styled.div`
   position: absolute;
-  bottom: 10px;
+  bottom: 5px;
   display: flex;
   flex-direction: column;
   /* align-items: flex-end; */
-  left: 10px;
+  left: 0px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+
 `
 
 export const ModalImageButtons = styled.div`
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  bottom: 5px;
+  right: 0px;
   display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 5px;
+`
+
+export const PriorityButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 3px;
+  margin: 3px;
+  background: ${p => p.selectionColor || '#424242'};
+  color: ${p => p.selected ? 'black' : p.color};
 `

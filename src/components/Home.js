@@ -20,7 +20,7 @@ import { Header, Content, PillContainer, Slider,
   PillText, Card, ModalCard, ModalCloseButton,
   CardContent, CardPriority, PageTitle, CardFooter,
   CardMotionImage, ModalImageText, ModalImageButtons,
-  MapContainer, CardBack
+  MapContainer, CardBack, PriorityButton
 } from './styled'
 
 const container = {
@@ -80,9 +80,9 @@ function timeSince(dateTime) {
 }
 
 const priorityStyle = {
-  high: 'red',
-  medium: 'orange',
-  low: 'yellow'
+  high: { color: 'red', icon: 'notification_important' },
+  medium: { color: 'orange', icon: 'error'},
+  low: { color: 'yellow', icon: 'warning'}
 }
 
 const getFeature = (pothole) => {
@@ -112,7 +112,7 @@ const getLayer = (features) => {
         image: new olStyleCircle({
           radius: 5,
           fill: new olStyleFill({
-            color: priorityStyle[feature.get('priority')]
+            color: priorityStyle[feature.get('priority')].color
           }),
           stroke: new olStyleStroke({
             color: 'black',
@@ -333,7 +333,7 @@ class Home extends Component {
         image: new olStyleCircle({
           radius: 5,
           fill: new olStyleFill({
-            color: priorityStyle[updatedFeature.priority]
+            color: priorityStyle[updatedFeature.priority].color
           }),
           stroke: new olStyleStroke({
             color: 'black',
@@ -401,7 +401,7 @@ class Home extends Component {
                       <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
                     </CardContent>
                     {pothole.priority !== 'low' && (<CardPriority>
-                      <i style={{color: priorityStyle[pothole.priority], fontSize: '2em' }} className="material-icons">error</i>
+                      <i style={{color: priorityStyle[pothole.priority].color, fontSize: '2em' }} className="material-icons">{priorityStyle[pothole.priority].icon}</i>
                     </CardPriority>)}
                   </div>
               </Card>
@@ -419,13 +419,17 @@ class Home extends Component {
                         <CardFooter>{selectedPothole.address}</CardFooter>
                         <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
                       </ModalImageText>
-                      <ModalImageButtons>
+                      <ModalImageButtons >
+                        <CardFooter>Priority:</CardFooter>
                         {['low', 'medium', 'high'].map(level => 
-                          <a key={level} style={ selectedPothole.priority === level ? { background: priorityStyle[level] } : {background: 'transparent'}}
+                          <PriorityButton key={level} selected={ selectedPothole.priority === level }
+                            selectionColor={ selectedPothole.priority === level ? priorityStyle[level].color : null}
+                            color={priorityStyle[level].color}
                             onClick={() => this.setPriority(level)}
-                            className="btn-floating btn-large waves-effect waves-light">
-                              <i style={selectedPothole.priority === level ? {color: 'white'} : {color: priorityStyle[level]}} className="material-icons">warning</i>
-                          </a>
+                            className="btn-large waves-effect waves-light btn">
+                              <i className="material-icons">{priorityStyle[level].icon}</i>
+                              {level}
+                          </PriorityButton>
                         )}
                       </ModalImageButtons>
                     </div>
