@@ -80,9 +80,9 @@ function timeSince(dateTime) {
 }
 
 const priorityStyle = {
-  high: { color: 'red', icon: 'notification_important' },
+  high: { color: 'red', icon: 'arrow_circle_up' },
   medium: { color: 'orange', icon: 'error'},
-  low: { color: 'yellow', icon: 'warning'}
+  low: { color: 'yellow', icon: 'arrow_circle_down'}
 }
 
 const getFeature = (pothole) => {
@@ -375,7 +375,7 @@ class Home extends Component {
             {this.state.potholes.map(pothole => (
               <CardBack>
                 <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">delete_forever</i>
-                <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">done_outline</i>
+                <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">check_circle</i>
                 <Card
                   layoutId={pothole.id}
                   dragDirectionLock
