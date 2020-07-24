@@ -38,7 +38,20 @@ const button = {
   bottom: '10%',
   maxWidth: '300px'
 }
-
+const backButton = {
+  backgroundColor: '#231f20',
+  borderRadius: '8px',
+  height: '3.3em',
+  fontWeight: '700',
+  boxShadow: 'rgba(0, 0, 0, 0.81) 0 10px 25px 0px',
+  position: 'absolute',
+  top: '5%',
+  left: '5%',
+  width: '90px',
+  display: 'flex',
+  justifyContent: 'space-evenly',
+  alignItems: 'center',
+}
 const icon = {
   position: 'absolute',
   fontSize: '56px',
@@ -124,6 +137,10 @@ class MobileMap extends Component {
     return (
       <>
         <Map fullScreen onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false}>
+          <button style={backButton} onClick={() => this.props.history.push('/')} className='waves-effect waves-light btn'>
+            <i  className="medium material-icons">chevron_left</i>
+            Back&nbsp;&nbsp;
+          </button>
           <div style={container}>
             <i style={icon} className="medium material-icons">place</i>
             <button disabled={this.state.loading} style={button} onClick={this.handleClick} className='waves-effect waves-light btn'>Looks Good</button>
