@@ -65,6 +65,13 @@ class MobileMap extends Component {
     super()
     this.state = {loading: false}
   }
+
+  componentDidMount() {
+    if (!this.props.location || !this.props.location.state || !this.props.location.state.file) {
+      this.props.history.push('/')
+    }
+  }
+
   handleClick = async () => {
     this.setState({loading: true})
 
