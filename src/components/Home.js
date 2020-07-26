@@ -409,7 +409,11 @@ class Home extends Component {
             <i style={{ color: '#424242' }} className="material-icons">filter_alt</i>
           </a>
         </Header>
-        {this.state.showFiltersMenu && <FiltersMenu>
+        {this.state.showFiltersMenu && <FiltersMenu
+          key="modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}>
           <div style={{ padding: "15px" }}>
             <p>
               Show

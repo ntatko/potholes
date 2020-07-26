@@ -191,9 +191,9 @@ export const PriorityButton = styled.div`
   color: ${p => p.selected ? 'black' : p.color};
 `
 
-export const FiltersMenu = styled.div`
+export const FiltersMenu = styled(motion.div)`
   position: absolute;
-  top: 23%;
+  top: 25%;
   right: 20px;
   border-radius: 15px;
   padding: 15px;
