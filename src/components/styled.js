@@ -84,7 +84,6 @@ export const ModalCard = styled(motion.div)`
   min-height: 90px;
   overflow: hidden;
   max-width: 600px;
-  box-shadow: none;
   background: white;
   position: fixed;
   will-change: opacity;
@@ -190,4 +189,16 @@ export const PriorityButton = styled.div`
   margin: 3px;
   background: ${p => p.selectionColor || '#424242'};
   color: ${p => p.selected ? 'black' : p.color};
+`
+
+export const FiltersMenu = styled.div`
+  position: absolute;
+  top: 23%;
+  right: 20px;
+  border-radius: 15px;
+  padding: 15px;
+  display: flex;
+  background: white;
+  z-index: 20;
+  box-shadow: 0px 10px 20px #222222a6;
 `

@@ -20,7 +20,7 @@ import { Header, Content, PillContainer, Slider,
   PillText, Card, ModalCard, ModalCloseButton,
   CardContent, CardPriority, PageTitle, CardFooter,
   CardMotionImage, ModalImageText, ModalImageButtons,
-  MapContainer, CardBack, PriorityButton
+  MapContainer, CardBack, PriorityButton, FiltersMenu
 } from './styled'
 
 const container = {
@@ -131,7 +131,20 @@ class Home extends Component {
   constructor (props) {
     super(props)
     this.scrollRef = React.createRef()
-    this.state = { activePage: 0, potholes: [], map: null, width: 400, selectedPothole: null, dragging: false, sortBy: 'createddate', opacity: 0.0 }
+    this.state = {
+      activePage: 0,
+      potholes: [],
+      map: null,
+      width: 400,
+      selectedPothole: null,
+      dragging: false,
+      sortBy: 'createddate',
+      opacity: 0.0,
+      sortOrder: 'desc',
+      showArchived: false,
+      showCurrent: true,
+      showFiltersMenu: false
+    }
   }
 
   async componentDidMount () {
@@ -150,22 +163,43 @@ class Home extends Component {
   }
 
   sortPotholes = (a, b) => {
-    const { sortBy } = this.state
-    if (a[sortBy] < b[sortBy]) {
-      return 1
-    } else if (a[sortBy] > b[sortBy]) {
-      return -1
-    } else {
-      return 0
+    const { sortBy, sortOrder } = this.state
+    switch(sortBy) {
+      case 'priority':
+        if (a[sortBy] === 'high' && b[sortBy] !== 'high') {
+          return sortOrder === 'desc' ? 1 : -1
+        } else if (a[sortBy] === 'medium' && b[sortBy] === 'low') {
+          return sortOrder === 'desc' ? 1 : -1
+        } else if (a[sortBy] === b[sortBy]) {
+          return 0
+        } else {
+          return sortOrder === 'desc' ? -1 : 1
+        }
+      default:
+        if (a[sortBy] < b[sortBy]) {
+          return sortOrder === 'desc' ? 1 : -1
+        } else if (a[sortBy] > b[sortBy]) {
+          return sortOrder === 'desc' ? -1 : 1
+        } else {
+          return 0
+        }
     }
-  } 
+  }
+
+  filterPotholes = (pothole) => {
+    const { showArchived, showCurrent } = this.state
+
+    const isArchived = pothole.archived
+    const isCurrent = !pothole.archived
+
+    return (showArchived && isArchived) || (showCurrent && isCurrent)
+  }
 
   getPotholes = async () => {
     const response = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
-    const points = await response.json()
+    const allPoints = await response.json()
 
-    points.sort(this.sortPotholes)
-    const allPoints = points.filter(pothole => !pothole.archived)
+    allPoints.sort(this.sortPotholes)
 
     const newPoints = allPoints.filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
     if (newPoints.length) {
@@ -298,7 +332,7 @@ class Home extends Component {
       const allPotholes = await response.json()
 
       allPotholes.sort(this.sortPotholes)
-      this.setState({ potholes: allPotholes.filter(pothole => !pothole.archived) })
+      this.setState({ potholes: allPotholes.filter(this.filterPotholes) })
     }
   }
 
@@ -348,7 +382,7 @@ class Home extends Component {
       const newPotholes = await nextResponse.json()
 
       newPotholes.sort(this.sortPotholes)
-      this.setState({potholes: newPotholes.filter(pothole => !pothole.archived)})
+      this.setState({potholes: newPotholes.filter(this.filterPotholes)})
 
     } catch (err) {
       console.error(err)
@@ -369,10 +403,63 @@ class Home extends Component {
             </div>
             <Slider activePage={this.state.activePage} />
           </PillContainer>
+          <a style={{ position: "absolute", top: "17.5%", right: "20px", background: "rgb(201,201,201)"}}
+            onClick={() => this.setState(state => ({ showFiltersMenu: !state.showFiltersMenu }))}
+            className="btn-floating waves-effect waves-light">
+            <i style={{ color: '#424242' }} className="material-icons">filter_alt</i>
+          </a>
         </Header>
+        {this.state.showFiltersMenu && <FiltersMenu>
+          <div style={{ padding: "15px" }}>
+            <p>
+              Show
+            </p>
+            <p>
+              <label>
+                <input type="checkbox" class="filled-in" checked={this.state.showArchived ? "checked" : ""} onClick={() => this.setState(state => ({ showArchived: !state.showArchived }))} />
+                <span>Show Archived</span>
+              </label>
+            </p>
+            <p>
+              <label>
+                <input type="checkbox" class="filled-in" checked={this.state.showCurrent ? "checked" : ""} onClick={() => this.setState(state => ({ showCurrent: !state.showCurrent }))} />
+                <span>Show Current</span>
+              </label>
+            </p>
+          </div>
+          <div style={{ padding: "15px" }}>
+            <p>
+              Sort by
+            </p>
+            <p>
+              <label>
+                <input name="sortBy" type="radio" checked={this.state.sortBy === 'createddate' ? "checked" : ""} onClick={async () => {
+                  await this.setState(state => state.sortBy !== 'createddate' ? ({sortBy: 'createddate'}) : ({sortOrder: state.sortOrder === 'desc' ? 'asc' : 'desc'}))
+                  this.setState(state => ({ potholes: [].concat(state.potholes).sort(this.sortPotholes) }))
+                }} />
+                <span>
+                  Created Date
+                  {this.state.sortBy === 'createddate' && <i className="material-icons">{this.state.sortOrder === 'desc' ? "expand_less" : "expand_more"}</i>}
+                </span>
+              </label>
+            </p>
+            <p>
+              <label>
+                <input name="sortBy" type="radio" checked={this.state.sortBy === 'priority' ? "checked" : ""} onClick={async () => {
+                  await this.setState(state => state.sortBy !== 'priority' ? ({sortBy: 'priority'}) : ({sortOrder: state.sortOrder === 'desc' ? 'asc' : 'desc'}))
+                  this.setState(state => ({ potholes: [].concat(state.potholes).sort(this.sortPotholes) }))
+                }}/>
+                <span>
+                  Priority
+                  {this.state.sortBy === 'priority' && <i className="material-icons">{this.state.sortOrder === 'desc' ? "expand_less" : "expand_more"}</i>}
+                </span>
+              </label>
+            </p>
+          </div>
+        </FiltersMenu>}
         <Content ref={this.scrollRef} activePage={this.state.activePage} width={this.state.width}>
           <AnimateSharedLayout type="crossfade">
-            {this.state.potholes.map(pothole => (
+            {this.state.potholes.filter(this.filterPotholes).map(pothole => (
               <CardBack>
                 <i style={{color: 'red', position: 'absolute', right: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">delete_forever</i>
                 <i style={{color: 'green', position: 'absolute', left: '50px', top: '40%', fontSize: '5em', opacity: this.state.opacity}} className="material-icons">check_circle</i>
@@ -421,7 +508,7 @@ class Home extends Component {
                       </ModalImageText>
                       <ModalImageButtons >
                         <CardFooter>Priority:</CardFooter>
-                        {['low', 'medium', 'high'].map(level => 
+                        {['high', 'medium', 'low'].map(level => 
                           <PriorityButton key={level} selected={ selectedPothole.priority === level }
                             selectionColor={ selectedPothole.priority === level ? priorityStyle[level].color : null}
                             color={priorityStyle[level].color}
