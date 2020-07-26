@@ -184,8 +184,7 @@ export const ModalImageButtons = styled.div`
 export const PriorityButton = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: 3px;
+  justify-content: space-between;
   margin: 3px;
   background: ${p => p.selectionColor || '#424242'};
   color: ${p => p.selected ? 'black' : p.color};
