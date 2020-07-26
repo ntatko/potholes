@@ -201,7 +201,7 @@ class Home extends Component {
 
     allPoints.sort(this.sortPotholes)
 
-    const newPoints = allPoints.filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
+    const newPoints = allPoints.filter(this.filterPotholes).filter(point => !this.state.potholes.map(hole => hole.id).includes(point.id))
     if (newPoints.length) {
       const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
 
@@ -211,7 +211,7 @@ class Home extends Component {
       this.setState({ potholes: allPoints })
     }
 
-    const deadPoints = this.state.potholes.filter(point => !allPoints.map(hole => hole.id).includes(point.id))
+    const deadPoints = this.state.potholes.filter(this.filterPotholes).filter(point => !allPoints.map(hole => hole.id).includes(point.id))
     if (deadPoints.length) {
       const layer = this.state.map.getLayers().getArray().find(layer => layer.get('title') === 'Potholes')
 
