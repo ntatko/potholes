@@ -121,12 +121,6 @@ export const CardContent = styled(motion.div)`
   border-radius: 5px;
 `
 
-export const CardPriority = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 10px 15px;
-`
 export const CardMotionImage = styled(motion.img)`
   width: 100%;
   height: 50%;
@@ -168,26 +162,6 @@ export const ModalImageText = styled.div`
   background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
 
-`
-
-export const ModalImageButtons = styled.div`
-  position: absolute;
-  bottom: 5px;
-  right: 0px;
-  display: flex;
-  flex-direction: column;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  border-radius: 5px;
-`
-
-export const PriorityButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 3px;
-  background: ${p => p.selectionColor || '#424242'};
-  color: ${p => p.selected ? 'black' : p.color};
 `
 
 export const FiltersMenu = styled(motion.div)`

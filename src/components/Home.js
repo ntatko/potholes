@@ -18,9 +18,9 @@ import { Map, VectorLayer, centerAndZoom } from '@bayer/ol-kit'
 
 import { Header, Content, PillContainer, Slider,
   PillText, Card, ModalCard, ModalCloseButton,
-  CardContent, CardPriority, PageTitle, CardFooter,
-  CardMotionImage, ModalImageText, ModalImageButtons,
-  MapContainer, CardBack, PriorityButton, FiltersMenu
+  CardContent, PageTitle, CardFooter,
+  CardMotionImage, ModalImageText,
+  MapContainer, CardBack, FiltersMenu
 } from './styled'
 
 const container = {
@@ -79,12 +79,6 @@ function timeSince(dateTime) {
   return Math.floor(seconds) + " seconds";
 }
 
-const priorityStyle = {
-  high: { color: 'red', icon: 'arrow_circle_up' },
-  medium: { color: 'orange', icon: 'error'},
-  low: { color: 'yellow', icon: 'arrow_circle_down'}
-}
-
 const getFeature = (pothole) => {
   return new olFeature({
     feature_type: ['pothole'],
@@ -112,7 +106,7 @@ const getLayer = (features) => {
         image: new olStyleCircle({
           radius: 5,
           fill: new olStyleFill({
-            color: priorityStyle[feature.get('priority')].color
+            color: 'yellow'
           }),
           stroke: new olStyleStroke({
             color: 'black',
@@ -165,16 +159,6 @@ class Home extends Component {
   sortPotholes = (a, b) => {
     const { sortBy, sortOrder } = this.state
     switch(sortBy) {
-      case 'priority':
-        if (a[sortBy] === 'high' && b[sortBy] !== 'high') {
-          return sortOrder === 'desc' ? 1 : -1
-        } else if (a[sortBy] === 'medium' && b[sortBy] === 'low') {
-          return sortOrder === 'desc' ? 1 : -1
-        } else if (a[sortBy] === b[sortBy]) {
-          return 0
-        } else {
-          return sortOrder === 'desc' ? -1 : 1
-        }
       default:
         if (a[sortBy] < b[sortBy]) {
           return sortOrder === 'desc' ? 1 : -1
@@ -341,54 +325,6 @@ class Home extends Component {
     this.setState({ opacity: Math.abs(info.offset.x/250) })
   }
 
-  setPriority = async string => {
-    const { selectedPothole } = this.state
-
-    const url = `${window.serviceBindings.GEOKIT_API_URL}/report/${selectedPothole.id}`
-
-    try {
-      await fetch(url, {
-        method: 'PATCH',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          priority: string
-        })
-      })
-
-      const response = await fetch(url)
-      const updatedFeature = await response.json()
-      this.setState({selectedPothole: updatedFeature})
-
-      const feature = this.state.map.getLayers().getArray().find(layer => layer.get('title') === "Potholes").getSource().getFeatures().find(feat => feat.get('id') === updatedFeature.id)
-      
-      feature.setStyle(new olStyleStyle({
-        image: new olStyleCircle({
-          radius: 5,
-          fill: new olStyleFill({
-            color: priorityStyle[updatedFeature.priority].color
-          }),
-          stroke: new olStyleStroke({
-            color: 'black',
-            width: 2
-          })
-        })
-      }))
-
-      feature.set('priority', string)
-
-      const nextResponse = await fetch(`${window.serviceBindings.GEOKIT_API_URL}/report`)
-      const newPotholes = await nextResponse.json()
-
-      newPotholes.sort(this.sortPotholes)
-      this.setState({potholes: newPotholes.filter(this.filterPotholes)})
-
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
   render () {
     const { selectedPothole } = this.state
 
@@ -403,11 +339,11 @@ class Home extends Component {
             </div>
             <Slider activePage={this.state.activePage} />
           </PillContainer>
-          <a style={{ position: "absolute", top: "17.5%", right: "20px", background: "rgb(201,201,201)"}}
+          <div style={{ position: "absolute", top: "17.5%", right: "20px", background: "rgb(201,201,201)"}}
             onClick={() => this.setState(state => ({ showFiltersMenu: !state.showFiltersMenu }))}
             className="btn-floating waves-effect waves-light">
             <i style={{ color: '#424242' }} className="material-icons">filter_alt</i>
-          </a>
+          </div>
         </Header>
         {this.state.showFiltersMenu && <FiltersMenu
           key="modal"
@@ -447,18 +383,6 @@ class Home extends Component {
                 </span>
               </label>
             </p>
-            <p>
-              <label>
-                <input name="sortBy" type="radio" checked={this.state.sortBy === 'priority' ? "checked" : ""} onClick={async () => {
-                  await this.setState(state => state.sortBy !== 'priority' ? ({sortBy: 'priority'}) : ({sortOrder: state.sortOrder === 'desc' ? 'asc' : 'desc'}))
-                  this.setState(state => ({ potholes: [].concat(state.potholes).sort(this.sortPotholes) }))
-                }}/>
-                <span>
-                  Priority
-                  {this.state.sortBy === 'priority' && <i className="material-icons">{this.state.sortOrder === 'desc' ? "expand_less" : "expand_more"}</i>}
-                </span>
-              </label>
-            </p>
           </div>
         </FiltersMenu>}
         <Content ref={this.scrollRef} activePage={this.state.activePage} width={this.state.width}>
@@ -486,17 +410,12 @@ class Home extends Component {
                   <motion.div className="card-image">
                     <motion.img style={{ height: 'auto' }} src={pothole.image_url} />
                   </motion.div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                    <CardContent>
-                      <CardFooter>{pothole.address}</CardFooter>
-                      <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
-                    </CardContent>
-                    {pothole.priority !== 'low' && (<CardPriority>
-                      <i style={{color: priorityStyle[pothole.priority].color, fontSize: '2em' }} className="material-icons">{priorityStyle[pothole.priority].icon}</i>
-                    </CardPriority>)}
-                  </div>
-              </Card>
-            </CardBack>
+                  <CardContent>
+                    <CardFooter>{pothole.address}</CardFooter>
+                    <CardFooter>Added {timeSince(pothole.createddate)} ago</CardFooter>
+                  </CardContent>
+                </Card>
+              </CardBack>
             ))}
 
             <AnimatePresence>
@@ -505,30 +424,14 @@ class Home extends Component {
                   
                   <div style={{ position: 'relative' }}>
                     <CardMotionImage src={selectedPothole.image_url} style={{ maxHeight: '70vh' }} />
-                    <div style={{display: 'flex', justifyContent: 'space-between' }}>
-                      <ModalImageText>
-                        <CardFooter>{selectedPothole.address}</CardFooter>
-                        <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
-                      </ModalImageText>
-                      <ModalImageButtons >
-                        <CardFooter>Priority:</CardFooter>
-                        {['high', 'medium', 'low'].map(level => 
-                          <PriorityButton key={level} selected={ selectedPothole.priority === level }
-                            selectionColor={ selectedPothole.priority === level ? priorityStyle[level].color : null}
-                            color={priorityStyle[level].color}
-                            onClick={() => this.setPriority(level)}
-                            className="btn-large waves-effect waves-light btn">
-                              <i className="material-icons">{priorityStyle[level].icon}</i>
-                              {level}
-                          </PriorityButton>
-                        )}
-                      </ModalImageButtons>
-                    </div>
+                    <ModalImageText>
+                      <CardFooter>{selectedPothole.address}</CardFooter>
+                      <CardFooter>Added {timeSince(selectedPothole.createddate)} ago</CardFooter>
+                    </ModalImageText>
                   </div>
                   <div>
                     <Map onMapInit={this.loadMinimap} updateUrlFromView={false} updateViewFromUrl={false} />
                     <motion.h5>{this.state.selectedPothole.id}</motion.h5>
-                    <motion.h2>{this.state.selectedPothole.priority}</motion.h2>
                   </div>
                   <ModalCloseButton onClick={() => this.setState({ selectedPothole: null })} className="material-icons">close</ModalCloseButton>
                 </ModalCard>
@@ -540,11 +443,11 @@ class Home extends Component {
           <Map onMapInit={this.onMapInit} updateUrlFromView={false} updateViewFromUrl={false} />
         </MapContainer>
 
-        <a style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
+        <div style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
           onClick={() => document.getElementById('file-upload').click()}
           className="btn-floating btn-large waves-effect waves-light">
             <i className="material-icons add">add</i>
-        </a>
+        </div>
         <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {
           this.handleImageUpload(e)
           this.setState({ open: false })
