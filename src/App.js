@@ -29,6 +29,9 @@ class App extends React.Component {
     return (
       <Router>
         <Switch>
+          <Route path={['/upload-report']}>
+            <UploadReport />
+          </Route>
           <Route path="/mobile-map">
             <MobileMap />
           </Route>
