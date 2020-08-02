@@ -34,12 +34,8 @@ jobs:
         cat ~/.netrc
         echo $HEROKU_PASSWORD | docker login $HEROKU_REGISTRY -u $HEROKU_USERNAME --password-stdin
 
-    - name: create heroku.yml
-      run: |
-        echo "build:" > heroku.yml
-        echo "  docker:" >> heroku.yml
-        echo "    web: Dockerfile.production" >> heroku.yml
-        echo "    worker: worker/Dockerfile" >> heroku.yml
+    - name: create proper dockerfile
+      run: cp Dockerfile.production Dockerfile
 
     - name: push the docker image to heroku
       run: |
