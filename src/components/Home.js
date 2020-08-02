@@ -22,6 +22,7 @@ import { Header, Content, PillContainer, Slider,
   CardMotionImage, ModalImageText,
   MapContainer, CardBack, FiltersMenu
 } from './styled'
+import ProfileHeader from './ProfileHeader'
 
 const container = {
   height: '100%'
@@ -331,6 +332,7 @@ class Home extends Component {
     return (
       <div style={container} id='page-content'>
         <Header>
+          <ProfileHeader />
           <PageTitle style={{ margin: '30px 0px' }}>Road Improvements</PageTitle>
           <PillContainer>
             <div style={pill}>
@@ -445,7 +447,8 @@ class Home extends Component {
 
         <div style={{ position: 'absolute', bottom: '20px', right: '20px', backgroundColor: '#424242' }}
           onClick={() => document.getElementById('file-upload').click()}
-          className="btn-floating btn-large waves-effect waves-light">
+          className="btn-floating btn-large waves-effect waves-light"
+          disabled={window?.user?.user}>
             <i className="material-icons add">add</i>
         </div>
         <input id='file-upload' hidden='true' style={button} type='file' accept='image/*' onChange={(e) => {

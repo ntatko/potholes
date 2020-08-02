@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "source .env.production && node scripts/start.js",
+    "start": "source .env.staging && node scripts/start.js",
     "start:local": "source .env.local && node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "npx eslint src/"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^1.0.0",
     "@babel/core": "7.9.0",
     "@bayer/ol-kit": "^0.14.0",
     "@material-ui/core": "^4.11.0",

@@ -90,7 +90,7 @@ class MobileMap extends Component {
     console.log("Preparing the upload");
     try {
       this.setState({ loading: true })
-      const response = await axios.post("https://geokit-api.herokuapp.com/getSignedUrl", {
+      const response = await axios.post(`${window.serviceBindings.S3_UPLOAD_API_URL}/getSignedUrl`, {
         fileName: `${new Date().toISOString()}-${UUID()}.${fileType}`
       })
       const returnData = response.data.data.returnData;
@@ -115,9 +115,9 @@ class MobileMap extends Component {
     const potholeData = {
       long,
       lat,
-      priority: 'low',
       address: address.results[0].locations[0].street,
-      imageUrl: s3PhotoUrl
+      imageUrl: s3PhotoUrl,
+      userId: window.user.user.id
     }
 
     const url = window.serviceBindings.GEOKIT_API_URL + '/report/'
