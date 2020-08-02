@@ -1,14 +1,8 @@
-# This is a basic workflow to help you get started with Actions
+name: Prod Deployment
 
-name: How do we deploy stuff?
-
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ master ]
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,27 +15,13 @@ jobs:
         
   build:
     env:
-      DOCKER_REGISTRY: ntatko/geokit-app
-      HEROKU_REGISTRY: registry.heroku.com
       HEROKU_APP: geokit-app
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
       HEROKU_PASSWORD: ${{ secrets.HEROKU_PASSWORD }}
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-
-    # Runs a single command using the runners shell
-    - name: login to docker
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
     - name: login to heroku
       env:
@@ -53,18 +33,15 @@ jobs:
         echo "  password $HEROKU_PASSWORD" >> ~/.netrc
         cat ~/.netrc
         echo $HEROKU_PASSWORD | docker login $HEROKU_REGISTRY -u $HEROKU_USERNAME --password-stdin
-    
-    - name: build the docker image
-      run: docker build -t $DOCKER_REGISTRY:$GITHUB_SHA -t $DOCKER_REGISTRY:latest -t $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA -t $HEROKU_REGISTRY/$HEROKU_APP:latest .
-    
-    - name: push the docker image to docker
+
+    - name: create heroku.yml
       run: |
-        docker push $DOCKER_REGISTRY:$GITHUB_SHA
-        docker push $DOCKER_REGISTRY:latest
+        echo "build:" > heroku.yml
+        echo "  docker:" >> heroku.yml
+        echo "    web: Dockerfile.production" >> heroku.yml
+        echo "    worker: worker/Dockerfile" >> heroku.yml
 
     - name: push the docker image to heroku
       run: |
         heroku container:push -a $HEROKU_APP web
-        docker push $HEROKU_REGISTRY/$HEROKU_APP:$GITHUB_SHA
-        docker push $HEROKU_REGISTRY/$HEROKU_APP:latest
         heroku container:release web -a $HEROKU_APP
