@@ -18,6 +18,8 @@ class App extends React.Component {
       showModal: false,
     }
 
+    console.log("environment", process.env.REACT_APP_ENVIRONMENT)
+
     window.serviceBindings = {}
 
     switch (process.env.REACT_APP_ENVIRONMENT) {
