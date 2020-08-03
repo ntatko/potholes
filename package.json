@@ -6,6 +6,7 @@
     "start": "source .env.staging && node scripts/start.js",
     "start:local": "source .env.local && node scripts/start.js",
     "build": "node scripts/build.js",
+    "build:staging": "node scripts/buildStaging.js",
     "test": "npx eslint src/"
   },
   "dependencies": {
